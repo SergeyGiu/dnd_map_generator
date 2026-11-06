@@ -15,7 +15,7 @@ def menu():
         print(f'3-{conf[lang]["map_settings_lb"]}')
         num = input()
 
-        if num == '0':
+        if num == '0' or num == '':
             break
         elif num == '1':
             menu_choice_lang()
@@ -36,7 +36,7 @@ def menu_settings_output():
         print(f'2-{conf[lang]["name_module_date"]} ({conf["module_settings"]["name_module_date"]})')
 
         num = input()
-        if num == '0':
+        if num == '0' or num == '':
             break
         elif num == '1':
             os.system('cls')
@@ -53,7 +53,7 @@ def menu_settings_output():
             print(f'1-Yes')
             print(f'2-No')
             num = input()
-            if num == '0':
+            if num == '0' or num == '':
                 break
             elif num == '1':
                 conf['module_settings']['name_module_date'] = 'Yes'
@@ -73,10 +73,8 @@ def menu_choice_lang():
         for i in range(len(lang_available)):
             print(f'{i+1}-{lang_available[i]}')
         new_num = input()
-        if new_num == '0':
+        if new_num == '0' or new_num == '':
             break
-        elif new_num == '':
-            pass
         else:
             try:
                 new_num = int(new_num) - 1
@@ -99,7 +97,7 @@ def menu_map_settings():
 
         num = input()
 
-        if num == '0':
+        if num == '0' or num == '':
             break
         elif num == '1':
             os.system('cls')
