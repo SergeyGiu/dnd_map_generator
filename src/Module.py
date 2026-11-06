@@ -1,6 +1,6 @@
 import json
 import os
-
+from read_write import generate_id
 
 '''{
   "id": "testclimodule",
@@ -166,8 +166,21 @@ class Module:
         with open(self.folder+'/.gitattributes', 'w', encoding='utf-8') as f:
             f.write('packs/** binary')
 
-    def add_scene(self):
+    def add_scene(self,name="",height = 1000,width=1000, padding=0.25):
         """Добавить сцену. Значит добавить json в папку scenes/_source"""
+        with open('example_jsons/fvtt_Scene.json', 'r', encoding='utf-8') as f:
+            scene = json.load(f)
+        print(scene)
+        gen = generate_id(16)
+        if name == "": title = gen
+        else: title = name
 
+        scene['name'] = title
+        scene['width'] = width
+        scene['height'] = height
+        scene['padding'] = padding
+        scene['_id'] = gen
+        scene['_key'] = f'!scenes!{gen}'
 
-        pass
+        with open(f'{self.folder}/packs/scenes/_source/{name}{gen}.json', 'w', encoding='utf-8') as f:
+            json.dump(scene, f, ensure_ascii=False, indent=4)
