@@ -2,7 +2,7 @@
     "ru": {
         "exit": "Выход",
         "settings": "Настройки",
-        "generate": "Генерация",
+        "generate": "Начать генерацию",
         "back": "Назад",
         "menu_main_lb": "Главное меню",
         "language_choice": "Изменить язык",
@@ -11,6 +11,13 @@
         "en_new_num": "Введите новое значение или оставьте поле пустым",
         "name_module": "Имя модуля",
         "name_module_date": "Добавлять в конце имени дату создания",
+        "sector": "Участок",
+        "village": "Село",
+        "city": "Город",
+        "world": "Мир",
+        "scene_add": "Добавить сцену",
+        "actor_add": "Добавить актёра",
+        "module_gen": "Сгенерировать модуль",
         "map": {
             "cell_size_px": "Размер ячейки в пикселях",
             "cell_size": "Размер ячейки",
@@ -25,10 +32,11 @@
         "cell_size_px": 50,
         "cell_size": 5,
         "cell_size_type": "ft",
-        "padding": 0.25
+        "padding": 0.25,
+        "map_size_sector_default": "1000x1000"
     },
     "module_settings": {
-        "name_module": "autogen",
+        "name_module": "module-auto-gen",
         "name_module_date": "Yes"
     }
 }
