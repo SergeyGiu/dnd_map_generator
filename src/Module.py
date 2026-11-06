@@ -168,6 +168,6 @@ class Module:
 
     def add_scene(self):
         """Добавить сцену. Значит добавить json в папку scenes/_source"""
-        
+
 
         pass

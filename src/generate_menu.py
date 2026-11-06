@@ -40,4 +40,23 @@ def menu():
         elif num == '2':
             pass
         elif num == '3':
-            pass
+            pack_packs()
+            break
+
+
+def pack_packs():
+    os.system('fvtt package pack "scenes" --type "Module" '
+              '--inputDirectory "./output/module-auto-gen/packs/scenes/_source"'
+              ' --outputDirectory "./output/module-auto-gen/packs"')
+    os.system('fvtt package pack "actors" --type "Module" '
+              '--inputDirectory "./output/module-auto-gen/packs/actors/_source"'
+              ' --outputDirectory "./output/module-auto-gen/packs"')
+    os.system('fvtt package pack "items" --type "Module" '
+              '--inputDirectory "./output/module-auto-gen/packs/items/_source"'
+              ' --outputDirectory "./output/module-auto-gen/packs"')
+    os.system('fvtt package pack "journals" --type "Module" '
+              '--inputDirectory "./output/module-auto-gen/packs/journals/_source"'
+              ' --outputDirectory "./output/module-auto-gen/packs"')
+    os.system('fvtt package pack "playlists" --type "Module" '
+              '--inputDirectory "./output/module-auto-gen/packs/playlists/_source"'
+              ' --outputDirectory "./output/module-auto-gen/packs"')
