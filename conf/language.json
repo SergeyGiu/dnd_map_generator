@@ -1,7 +1,34 @@
-{"ru":
-  { "exit": "Выход",
-    "settings": "Настройки",
-    "generate": "Генерация"
-  },
-  "lang": "ru"
+{
+    "ru": {
+        "exit": "Выход",
+        "settings": "Настройки",
+        "generate": "Генерация",
+        "back": "Назад",
+        "menu_main_lb": "Главное меню",
+        "language_choice": "Изменить язык",
+        "settings_output": "Настройки вывода",
+        "map_settings_lb": "Настройки параметров карты",
+        "en_new_num": "Введите новое значение или оставьте поле пустым",
+        "name_module": "Имя модуля",
+        "name_module_date": "Добавлять в конце имени дату создания",
+        "map": {
+            "cell_size_px": "Размер ячейки в пикселях",
+            "cell_size": "Размер ячейки",
+            "padding": "Отступ от края карты"
+        }
+    },
+    "lang_available": [
+        "ru"
+    ],
+    "lang": "ru",
+    "map_settings": {
+        "cell_size_px": 50,
+        "cell_size": 5,
+        "cell_size_type": "ft",
+        "padding": 0.25
+    },
+    "module_settings": {
+        "name_module": "autogen",
+        "name_module_date": "Yes"
+    }
 }
