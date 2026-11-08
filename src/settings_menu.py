@@ -1,6 +1,6 @@
 import os
 
-from read_write import read_conf,write_conf
+from src.read_write import read_conf,write_conf
 
 def menu():
     while True:

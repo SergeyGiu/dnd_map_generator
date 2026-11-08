@@ -2,8 +2,8 @@ import datetime
 import json
 import os
 import shutil
-from read_write import read_conf
-from Module import Module
+from src.read_write import read_conf
+from src.Module import Module
 
 def delete_tmp_module(folder= "output/module_tmp"):
     if os.path.exists(folder):
@@ -35,13 +35,101 @@ def menu():
         if num == '0' or num == '':
             break
         elif num == '1':
-            module.add_scene()
+            menu_add_scene(module = module)
 
         elif num == '2':
             pass
         elif num == '3':
             pack_packs()
             break
+
+def menu_add_scene(module):
+    def change_size(data_local):
+        while True:
+            os.system('cls')
+            conf = read_conf()
+            lang = conf['lang']
+            x = data_local['width']
+            y = data_local['height']
+            print(f'{conf[lang]["en_new_scene_size"]} ({x}x{y})')
+            print(f'0-{conf[lang]["back"]}')
+
+            num_local = input()
+            x,y = num_local.replace('х', 'x').replace('X', 'x').split('x')
+            if num_local == '0' or num_local == '':
+                break
+            try:
+                return int(x), int(y)
+            except:
+                continue
+
+    def change_type_scene(data_local):
+        while True:
+            os.system('cls')
+            conf = read_conf()
+            lang = conf['lang']
+            print(f'{conf[lang]["en_new_type_scene"]} ({data_local["type_scene"]})')
+            print(f'0-{conf[lang]["back"]}')
+
+            ar_scenes = conf['map_settings']['type_scenes']
+            for i in range(len(ar_scenes)):
+                print(f'{i+1}-{ar_scenes[i]}')
+            num_local = input()
+            if num_local == '0' or num_local == '':
+                break
+            else:
+                try:
+                    num_local = int(num_local)
+                    if num_local > len(ar_scenes) or num_local < 1:
+                        continue
+                    return ar_scenes[num_local-1]
+                except:
+                    continue
+
+    conf = read_conf()
+    data = {'width':1000, "height":1000,
+            "type_scene": conf["map_settings"]["type_scenes"][0],
+            "snow_lvl": 0, "biome": "forest", "ruin_level": 0,
+            "overgrowth_level": 0, "abandonment_level": 0}
+    while True:
+        os.system('cls')
+        conf = read_conf()
+        lang = conf['lang']
+        print(f'{conf[lang]["settings_scene"]}')
+        print(f'0-{conf[lang]["back"]}')
+        print(f'1-{conf[lang]["scene_add"]}')
+        print(f'2-{conf[lang]["scene_size"]} ({data["width"]}x{data["height"]})')
+        print(f'3-{conf[lang]["type_scene"]} ({data["type_scene"]})')
+        print(f'4-{conf[lang]["snow_lvl"]} ({data["snow_lvl"]} %)')
+        print(f'5-{conf[lang]["biome"]} ({data["biome"]})')
+        print(f'6-{conf[lang]["ruin_level"]} ({data["ruin_level"]})')
+        print(f'7-{conf[lang]["overgrowth_level"]} ({data["overgrowth_level"]})')
+        print(f'8-{conf[lang]["abandonment_level"]} ({data["abandonment_level"]})')
+
+
+
+
+        num = input()
+
+        if num == '0' or num == '':
+            break
+        elif num == '1':
+            #1) Добавляем json чтобы могли его настраивать под нужды
+            path = module.add_scene(width=data["width"],
+                             height=data["height"],
+                             padding = conf['map_settings']['padding'])
+
+            print(data)
+            break
+        if num == '2':
+            data['width'],data['height'] = change_size(data)
+            continue
+        elif num == '3':
+            data['type_scene'] = change_type_scene(data)
+
+
+
+
 
 
 def pack_packs():

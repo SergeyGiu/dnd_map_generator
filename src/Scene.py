@@ -8,10 +8,7 @@ class Scene:
         self.width = width
         self.height = height
         self.padding = padding
-        js_scene = self.read_example_scene()
-        if self.width is not None: js_scene.width = self.width
-        if self.height is not None: js_scene.height = self.height
-        if self.padding is not None: js_scene.padding = self.padding
+
 
         self.js_scene = js_scene
 

@@ -1,7 +1,10 @@
 import json
 import os
-import generate_menu, settings_menu
-from read_write import read_conf,write_conf
+
+import src.generate_menu as generate_menu
+import src.settings_menu as settings_menu
+
+from src.read_write import read_conf,write_conf
 
 if __name__ == '__main__':
     while True:
