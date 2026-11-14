@@ -4,7 +4,7 @@ import os
 import src.generate_menu as generate_menu
 import src.settings_menu as settings_menu
 
-from src.read_write import read_conf,write_conf
+from src.utils import read_conf,write_conf
 
 if __name__ == '__main__':
     while True:

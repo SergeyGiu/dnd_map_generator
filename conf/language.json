@@ -18,7 +18,7 @@
         "scene_add": "Добавить сцену",
         "actor_add": "Добавить актёра",
         "module_gen": "Сгенерировать модуль",
-        "settings_scene":"Настроить сцену",
+        "settings_scene": "Настроить сцену",
         "scene_size": "Размер сцены",
         "type_scene": "Тип сцены",
         "en_new_scene_size": "Введите новый размер сцены",
@@ -41,7 +41,9 @@
     ],
     "lang": "ru",
     "map_settings": {
-        "type_scenes": ["house_001"],
+        "type_scenes": [
+            "house_001"
+        ],
         "cell_size_px": 50,
         "cell_size": 5,
         "cell_size_type": "ft",

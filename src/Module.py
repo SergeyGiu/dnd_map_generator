@@ -1,7 +1,7 @@
 import json
 import os
-from src.read_write import generate_id
-from src.Scene import Scene
+from src.utils import generate_id
+
 '''{
   "id": "testclimodule",
   "title": "test_cli_module",
@@ -179,17 +179,59 @@ class Module:
         if name == "": title = gen
         else: title = name
 
+        from src.generate_scene.house_001.generate_main import start_generate
+
+
         scene['name'] = title
-        scene['width'] = width
-        scene['height'] = height
-        scene['padding'] = padding
+
         scene['_id'] = gen
         scene['_key'] = f'!scenes!{gen}'
+
+        js = start_generate(data=data, key = gen)
+        if data is not None:
+            if data.get('width') is not None: scene['width'] = data['width']
+            else: scene['width'] = width
+
+            if data.get('height') is not None: scene['height'] = data['height']
+            else: scene['height'] = height
+
+            if data.get('padding') is not None: scene['padding'] = data['padding']
+            else: scene['padding'] = padding
+
+
+        scene['walls'] = js['walls']
+        scene['tiles'] = js['tiles']
+        scene['flags'] = {
+    "levels": {
+      "sceneLevels": [
+        [
+          "-10",
+          "-1",
+          ""
+        ],
+        [
+          "0",
+          "9",
+          ""
+        ],
+        [
+          "10",
+          "19",
+          ""
+        ]
+      ]
+    }
+  }
+
+
+
 
         path = f'{self.folder}/packs/scenes/_source/{name}{gen}.json'
         js = {'path':path}
         self.scenes.append(js)
         with open(path, 'w', encoding='utf-8') as f:
             json.dump(scene, f, ensure_ascii=False, indent=4)
-
         return path
+
+
+

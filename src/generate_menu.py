@@ -1,8 +1,6 @@
-import datetime
-import json
 import os
 import shutil
-from src.read_write import read_conf
+from src.utils import read_conf
 from src.Module import Module
 
 def delete_tmp_module(folder= "output/module_tmp"):
@@ -90,7 +88,10 @@ def menu_add_scene(module):
     data = {'width':1000, "height":1000,
             "type_scene": conf["map_settings"]["type_scenes"][0],
             "snow_lvl": 0, "biome": "forest", "ruin_level": 0,
-            "overgrowth_level": 0, "abandonment_level": 0}
+            "overgrowth_level": 0, "abandonment_level": 0,
+            'padding': conf["map_settings"]["padding"],
+            "cell": conf["map_settings"]["cell_size_px"],
+            "module_name": conf["module_settings"]["name_module"],}
     while True:
         os.system('cls')
         conf = read_conf()
@@ -115,11 +116,10 @@ def menu_add_scene(module):
             break
         elif num == '1':
             #1) Добавляем json чтобы могли его настраивать под нужды
-            path = module.add_scene(width=data["width"],
-                             height=data["height"],
-                             padding = conf['map_settings']['padding'])
+            #js = start_generate(data=data)
 
-            print(data)
+            path = module.add_scene(data = data)
+
             break
         if num == '2':
             data['width'],data['height'] = change_size(data)
