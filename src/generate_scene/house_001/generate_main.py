@@ -355,7 +355,7 @@ def start_generate(data, key):
                 'cell': cell,
                 }
         print('Люк расположен:', luke['x'], luke['y'])
-        luke_tile = src.add_tile.luke(luke)
+        luke_tile = src.add_tile.luke_and_stairs(luke)
 
         tiles.extend(luke_tile)
         walls_cellar, doors_cellar = add_cellar(luke['x'], luke['y'],home_border=[x1, y1, x2, y2], cell=cell,doors= doors_raw)
