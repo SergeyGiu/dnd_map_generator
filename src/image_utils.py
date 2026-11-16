@@ -451,3 +451,77 @@ def darken_near_walls(img: Image.Image,
     arr[..., :3] *= factor
     out = np.clip(arr, 0, 255).astype(np.uint8)
     return Image.fromarray(out, mode=base.mode)
+
+
+
+from PIL import Image, ImageDraw
+
+
+from PIL import Image, ImageDraw
+
+from PIL import Image, ImageDraw
+
+from PIL import Image, ImageDraw
+
+
+def cut_hole(img, polygon1, polygon2, offset=0.0):
+    """Делает дырку (прозрачную область) в изображении по полигону.
+
+    polygon1 задаёт систему координат (опорная рамка), polygon2 —
+    что вырезать. offset смещает polygon2 относительно его центра:
+    положительное значение расширяет полигон (ближе к краям),
+    отрицательное — сжимает (ближе к центру).
+
+    Args:
+        img: Изображение (PIL.Image) или путь к файлу.
+        polygon1: Вершины [(x, y), ...] опорной рамки в координатах сцены.
+        polygon2: Вершины [(x, y), ...] вырезаемой области в координатах сцены.
+        offset: Смещение относительно центра polygon2. Значение в тех же
+            единицах, что и координаты (пиксели сцены). Положительное —
+            наружу (расширение), отрицательное — внутрь (сжатие).
+            По умолчанию 0 — без изменений.
+
+    Returns:
+        PIL.Image RGBA размером с img: всё, кроме polygon2 (с учётом offset),
+        сохранено; внутри polygon2 — alpha=0.
+    """
+    if isinstance(img, str):
+        img = Image.open(img)
+    img = img.convert("RGBA")
+
+    # 1. Система координат по polygon1
+    xs1 = [p[0] for p in polygon1]
+    ys1 = [p[1] for p in polygon1]
+    min_x, min_y = min(xs1), min(ys1)
+    max_x, max_y = max(xs1), max(ys1)
+    box_w, box_h = max_x - min_x, max_y - min_y
+
+    sx = img.width / box_w if box_w else 1
+    sy = img.height / box_h if box_h else 1
+
+    # 2. Центроид polygon2 (в координатах сцены)
+    cx = sum(p[0] for p in polygon2) / len(polygon2)
+    cy = sum(p[1] for p in polygon2) / len(polygon2)
+
+    # 3. Радиус описанной окружности — для перевода offset в коэффициент
+    import math
+    radius = max(math.hypot(p[0] - cx, p[1] - cy) for p in polygon2)
+    if radius == 0:
+        k = 1.0
+    else:
+        k = 1.0 + offset / radius
+
+    # 4. Масштабируем polygon2 относительно центроида, затем -> локальные коорд.
+    local_polygon = []
+    for x, y in polygon2:
+        nx = cx + (x - cx) * k
+        ny = cy + (y - cy) * k
+        local_polygon.append(((nx - min_x) * sx, (ny - min_y) * sy))
+
+    # 5. Маска: 255 везде, 0 внутри polygon2
+    mask = Image.new("L", img.size, 255)
+    ImageDraw.Draw(mask).polygon(local_polygon, fill=0)
+
+    out = img.copy()
+    out.putalpha(mask)
+    return out

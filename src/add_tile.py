@@ -3,7 +3,7 @@ from Tools.demo.spreadsheet import cellname
 import src.image_utils as image_utils
 from src.utils import generate_id, tile_add_action
 
-def luke_and_stairs(data):
+def luke_and_stairs(data, type_luke = "base", type_stairs = "stick",rotate = 0):
     # Функция создаёт тайл люк, а под ним на уровень ниже тайл лестница
     # и невидимый тайл для триггера
 
@@ -23,27 +23,36 @@ def luke_and_stairs(data):
     id_tile_luke_close = generate_id(16) # id варианта изображения люка
     id_tile_luke_open = generate_id(16) # id варианта изображения люка
 
-    entity_stair = {
-        "id": f"Scene.{key}.Tile.{id_tile_stairs}",
-        "name": f"Tile: {id_tile_stairs}"
-    }
-
     # Информация о лестнице
     out_stair_path = f'output/{module_name}/assets/stairs_001_{key}_{id_tile_stairs}.png'
     module_stair_path = f'modules/{module_name}/assets/stairs_001_{key}_{id_tile_stairs}.png'
-    img_stair = image_utils.open_image('images/stairs/stairs_001.png')
+    if type_stairs == "stick":
+        img_stair = image_utils.open_image('images/stairs/stairs_001.png')
+    elif type_stairs == "diagonal_wood":
+        img_stair = image_utils.open_image('images/stairs/stairs_diagonal_wood_001.png')
+    else:
+        exit('Неизвестный тип лестницы')
+
     image_utils.save_image(img_stair,out_stair_path)
 
     # Информация о люке закрытом
     out_luke_close_path = f'output/{module_name}/assets/luke_close_{key}_{id_tile_luke}.png'
     module_luke_close_path = f'modules/{module_name}/assets/luke_close_{key}_{id_tile_luke}.png'
-    img_luke_close = image_utils.open_image('images/interior/luke_001_close.png')
+    if type_luke == "base":
+        img_luke_close = image_utils.open_image('images/interior/luke_001_close.png')
+    elif type_luke == "double_door":
+        img_luke_close = image_utils.open_image('images/interior/luke_double_001_close.png')
+    else: exit('Неизвестное направление')
     image_utils.save_image(img_luke_close, out_luke_close_path)
 
     # Информация о лшюке открытом
     out_luke_open_path = f'output/{module_name}/assets/luke_open_{key}_{id_tile_luke}.png'
     module_luke_open_path = f'modules/{module_name}/assets/luke_open_{key}_{id_tile_luke}.png'
-    img_luke_open = image_utils.open_image( 'images/interior/luke_001_open.png')
+    if type_luke == "base":
+        img_luke_open = image_utils.open_image( 'images/interior/luke_001_open.png')
+    elif type_luke == "double_door": \
+            img_luke_open = image_utils.open_image('images/interior/luke_double_001_open.png')
+    else: exit('Неизвестное направление')
     image_utils.save_image(img_luke_open, out_luke_open_path)
 
     tag_luke = generate_id(16)
@@ -76,7 +85,7 @@ def luke_and_stairs(data):
                 "alpha": 0
             },
             "_id": id_tile_stairs,
-            "rotation": 0,
+            "rotation": rotate,
             "alpha": 1,
             "hidden": False,
             "locked": False,
@@ -132,12 +141,9 @@ def luke_and_stairs(data):
             },
             "_key": f"!scenes.tiles!{key}.{id_tile_stairs}"
         }
-    #print(js_stair)
     tile_add_action(tile = js_stair, action = 'method', params= {"goto": "Проверка_закрытости", 'method': "enter"})
     tile_add_action(tile=js_stair, action='checkvariable',params={'tag': tag_luke, "var": "открыто", 'value': "1"})
     tile_add_action(tile=js_stair, action='elevation', params={'elevation': elevation})
-
-    #print(js_stair)
 
     tiles.append(js_stair)
 
@@ -166,7 +172,7 @@ def luke_and_stairs(data):
             "alpha": 0
           },
           "_id": id_tile_luke,
-          "rotation": 0,
+          "rotation": rotate,
           "alpha": 1,
           "hidden": False,
           "locked": False,
@@ -212,179 +218,6 @@ def luke_and_stairs(data):
               "chance": 100,
               "fileindex": 1,
               "actions": [
-                {
-                  "action": "method",
-                  "data": {
-                    "method": "enter",
-                    "goto": "Проверка_закрытости"
-                  },
-                  "id": generate_id(16)
-                },
-                {
-                  "action": "checkvariable",
-                  "data": {
-                    "entity": "",
-                    "type": "all",
-                    "name": "открыто",
-                    "value": "1",
-                    "fail": ""
-                  },
-                  "id":generate_id(16)
-                },
-                {
-                  "action": "elevation",
-                  "data": {
-                    "entity": {
-                      "id": "token",
-                      "name": "Триггерный токен"
-                    },
-                    "value": elevation-10
-                  },
-                  "id":generate_id(16)
-                },
-                {
-                  "action": "anchor",
-                  "data": {
-                    "tag": "Проверка_закрытости",
-                    "stop": True
-                  },
-                  "id": generate_id(16)
-                },
-                {
-                  "action": "checkvariable",
-                  "data": {
-                    "entity": "",
-                    "type": "all",
-                    "name": "открыто",
-                    "value": "1",
-                    "fail": "открыть"
-                  },
-                  "id": generate_id(16)
-                },
-                {
-                  "action": "playertype",
-                  "data": {
-                    "gm": "закрыть",
-                    "player": "выход"
-                  },
-                  "id": generate_id(16)
-                },
-                {
-                  "action": "anchor",
-                  "data": {
-                    "tag": "открыть",
-                    "stop": True
-                  },
-                  "id": generate_id(16)
-                },
-                {
-                  "action": "playertype",
-                  "data": {
-                    "gm": "точно_открыть",
-                    "player": "выход"
-                  },
-                  "id": generate_id(16)
-                },
-                {
-                  "action": "anchor",
-                  "data": {
-                    "tag": "точно_открыть",
-                    "stop": True
-                  },
-                  "id": generate_id(16)
-                },
-                {
-                  "action": "tileimage",
-                  "data": {
-                    "entity": {
-                      "id": "tile",
-                      "name": "Этот тайл"
-                    },
-                    "select": "2",
-                    "transition": "none",
-                    "speed": 1,
-                    "loop": 1
-                  },
-                  "id": generate_id(16)
-                },
-                {
-                  "action": "setvariable",
-                  "data": {
-                    "entity": "",
-                    "name": "открыто",
-                    "value": "1"
-                  },
-                  "id": generate_id(16)
-                },
-                {
-                  "action": "scrollingtext",
-                  "data": {
-                    "text": "Открыть",
-                    "entity": {
-                      "id": "tile",
-                      "name": "Этот тайл"
-                    },
-                    "for": "trigger",
-                    "duration": 5,
-                    "anchor": "0",
-                    "direction": "2"
-                  },
-                  "id": generate_id(16)
-                },
-                {
-                  "action": "anchor",
-                  "data": {
-                    "tag": "закрыть",
-                    "stop": True
-                  },
-                  "id": generate_id(16)
-                },
-                {
-                  "action": "setvariable",
-                  "data": {
-                    "entity": "",
-                    "name": "открыто",
-                    "value": "0"
-                  },
-                  "id": generate_id(16)
-                },
-                {
-                  "action": "tileimage",
-                  "data": {
-                    "entity": {
-                      "id": "tile",
-                      "name": "Этот тайл"
-                    },
-                    "select": "1",
-                    "transition": "none",
-                    "speed": 1,
-                    "loop": 1
-                  },
-                  "id": generate_id(16)
-                },
-                {
-                  "action": "scrollingtext",
-                  "data": {
-                    "text": "Закрыть",
-                    "entity": {
-                      "id": "tile",
-                      "name": "Этот тайл"
-                    },
-                    "for": "trigger",
-                    "duration": 5,
-                    "anchor": "0",
-                    "direction": "2"
-                  },
-                  "id": generate_id(16)
-                },
-                {
-                  "action": "anchor",
-                  "data": {
-                    "tag": "выход",
-                    "stop": True
-                  },
-                  "id": generate_id(16)
-                }
               ],
               "files": [
                 {
@@ -410,6 +243,25 @@ def luke_and_stairs(data):
           },
           "_key": f"!scenes.tiles!{key}.{id_tile_luke}"
         }
+
+    tile_add_action(tile=js_luke, action='method',params={"goto": "Проверка_закрытости", 'method': "enter"})
+    tile_add_action(tile=js_luke, action='checkvariable',params={"var": "открыто", 'value': "1"})
+    tile_add_action(tile=js_luke, action='elevation',params={'elevation': elevation-10})
+    tile_add_action(tile=js_luke, action='enter',params={'name': "Проверка_закрытости"})
+    tile_add_action(tile=js_luke, action='checkvariable',params={"var": "открыто", 'value': "1", 'goto': "открыть"})
+    tile_add_action(tile=js_luke, action='playertype',params={"gm": "закрыть",'player': "выход"})
+    tile_add_action(tile=js_luke, action='enter',params={'name': "открыть"})
+    tile_add_action(tile=js_luke, action='playertype',params={"gm": "точно_открыть",'player': "выход"})
+    tile_add_action(tile=js_luke, action='enter',params={'name': "точно_открыть"})
+    tile_add_action(tile=js_luke, action='tileimage',params={"select": "2"})
+    tile_add_action(tile=js_luke, action='setvariable',params={"value": "1", 'var': "открыто"})
+    tile_add_action(tile=js_luke, action='text',params={"text": "открыть"})
+    tile_add_action(tile=js_luke, action='enter',params={'name': "закрыть"})
+    tile_add_action(tile=js_luke, action='setvariable',params={"value": "0", 'var': "открыто"})
+    tile_add_action(tile=js_luke, action='tileimage',params={"select": "1"})
+    tile_add_action(tile=js_luke, action='text',params={"text": "закрыть"})
+    tile_add_action(tile=js_luke, action='enter',params={'name': "выход"})
+
 
     tiles.append(js_luke)
     return tiles

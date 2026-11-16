@@ -8,6 +8,7 @@ from src.image_utils import *
 from .check_input import check_input
 from .utils import *
 import src.add_tile
+import src.generate_scene.house_001.utils
 def start_generate(data, key):
     """Основная функция для генерации сцены.
     На вход принимает словарь с параметрами.
@@ -269,14 +270,15 @@ def start_generate(data, key):
     # Добавить тайл пола
     # Рассчитать внешний полигон
     polygon = build_outer_polygon(walls)
+    print('polygon', polygon)
     left_top = get_top_left_point(polygon)
-    img = tile_image_to_polygon('images/texture_wood/wood_001.png',
-                                points=polygon)
-    # Создать конечную картинку
-    info = get_image_info(img)
 
-    img = darken_near_walls(
-        img,
+    img_floor_1 = tile_image_to_polygon('images/texture_wood/wood_001.png',points=polygon)
+    # Создать конечную картинку
+    info = get_image_info(img_floor_1)
+
+    img_floor_1 = darken_near_walls(
+        img_floor_1,
         walls=walls,  # глобальные координаты — как есть!
         left_top=left_top,  # глобальная позиция картинки
         distance=cell*0.4,
@@ -286,13 +288,16 @@ def start_generate(data, key):
         scene_padding=20,  # запас, чтобы стены за краем дали тень
     )
 
-    path_tile = f'output/{module_name}/assets/wood_001.png'
-    path_tile_ = f'modules/{module_name}/assets/wood_001.png'
-    save_image(img, path_tile)
+
+
     gen_tile = generate_id(16)
+    out_floor1_path = f'output/{module_name}/assets/floor1_{gen_tile}.png'
+    module_floor1_path = f'modules/{module_name}/assets/floor1_{gen_tile}.png'
+
+
     js_tile = {
           "texture": {
-            "src": path_tile_,
+            "src": module_floor1_path,
             "anchorX": 0.5,
             "anchorY": 0.5,
             "offsetX": 0,
@@ -355,11 +360,42 @@ def start_generate(data, key):
                 'cell': cell,
                 }
         print('Люк расположен:', luke['x'], luke['y'])
-        luke_tile = src.add_tile.luke_and_stairs(luke)
+        polygon2 = [[luke['x'],luke['y']],
+                    [luke['x']+cell, luke['y']],
+                    [luke['x']+cell, luke['y']+cell],
+                    [luke['x'], luke['y'] + cell]
+                    ]
+        img_floor_1 = cut_hole(img_floor_1, polygon1=polygon,
+                polygon2=polygon2, offset=-5)
 
+        luke_tile = src.add_tile.luke_and_stairs(luke)
         tiles.extend(luke_tile)
-        walls_cellar, doors_cellar = add_cellar(luke['x'], luke['y'],home_border=[x1, y1, x2, y2], cell=cell,doors= doors_raw)
+
+        dict_cellar = add_cellar(luke['x'], luke['y'],home_border=[x1, y1, x2, y2], cell=cell,doors= doors_raw)
+        walls_cellar = dict_cellar['ar_walls']
+
         walls_cellar_dict = []
+        if dict_cellar.get('coord_outer_luke') is not None:
+            luke_outer = {"x": dict_cellar.get('coord_outer_luke')[0],
+                    "y": dict_cellar.get('coord_outer_luke')[1],
+                    'key': key,
+                    'module_name': module_name,
+                    'elevation': 0,
+                    'cell': cell,
+                    }
+            print("dict_cellar.get('direct_outer_luke')", dict_cellar.get('direct_outer_luke'))
+            if dict_cellar.get('direct_outer_luke') == 'up': rotate = 0
+            elif dict_cellar.get('direct_outer_luke') == 'down': rotate = 180
+            elif dict_cellar.get('direct_outer_luke') == 'left': rotate = 270
+            elif dict_cellar.get('direct_outer_luke') == 'right': rotate = 90
+            else:
+                exit('Неизвестный наклон')
+
+            print('rotate',rotate)
+            luke_tile = src.add_tile.luke_and_stairs(luke_outer, type_stairs='diagonal_wood', rotate=rotate, type_luke='double_door')
+            print('Тайлы люка')
+            print(*luke_tile, sep='\n')
+            tiles.extend(luke_tile)
         for i in range(len(walls_cellar)):
 
             gen_id = generate_id(16)
@@ -394,8 +430,8 @@ def start_generate(data, key):
             wall = [walls_cellar[i][0][0], walls_cellar[i][0][1], walls_cellar[i][1][0], walls_cellar[i][1][1]]
             data_tile = {"input_image": 'images/texture_wood/wood_001.png',
                          'wall': wall, 'key': key,
-                         'path': f'output/{module_name}/assets/wood_002_{i}.png',
-                         'path_': f'modules/{module_name}/assets/wood_002_{i}.png',
+                         'path': f'output/{module_name}/assets/wood_002_{gen_id}_{i}.png',
+                         'path_': f'modules/{module_name}/assets/wood_002_{gen_id}_{i}.png',
                          'range_top': -1,
                          "elevation": -10,
                          }
@@ -415,8 +451,7 @@ def start_generate(data, key):
             print('Стены подвала', walls_cellar_dict)
             print('внешний контур подвала', polygon)
             print('left_top', left_top)
-        img = tile_image_to_polygon('images/texture_stone/stone_001.png',
-                                    points=polygon)
+        img = tile_image_to_polygon('images/texture_stone/stone_001.png',points=polygon)
         # Создать конечную картинку
         info = get_image_info(img)
 
@@ -484,6 +519,7 @@ def start_generate(data, key):
         }
         tiles.append(js_tile)
 
+    save_image(img_floor_1, out_floor1_path)
     out = {"walls": walls, 'tiles': tiles, "levels": levels}
     return out
 
@@ -583,8 +619,10 @@ def add_cellar(x,y,
         else:
             print("Подвал не имеет дверей наружу")
 
-
+    coord_outer_luke = []
+    dol = None
     if second_exit != "":
+        dol = second_exit
         # Надо найти нужную стену чтобы её разрубить и раширить для ступенек
         if second_exit == 'down':
             wall_exit = [[board[0][0],board[1][1]], [board[1][0],board[1][1]]]
@@ -602,6 +640,9 @@ def add_cellar(x,y,
                     else:
                         # Всё норм, совпадений нет, выходи
                         break
+
+            coord_outer_luke = [door_x, door_y]
+
 
             ar_doors_local.append([[door_x,door_y],[door_x+cell,door_y]])
 
@@ -633,7 +674,7 @@ def add_cellar(x,y,
                     else:
                         # Всё норм, совпадений нет, выходи
                         break
-
+            coord_outer_luke = [door_x, door_y-cell]
             ar_doors_local.append([[door_x, door_y], [door_x + cell, door_y]])
 
             ar_wall_local.append([[wall_exit[0][0], door_y], [door_x, door_y]])
@@ -663,7 +704,7 @@ def add_cellar(x,y,
                     else:
                         # Всё норм, совпадений нет, выходи
                         break
-
+            coord_outer_luke = [door_x-cell, door_y]
             ar_doors_local.append([[door_x, door_y], [door_x, door_y+cell]])
 
             ar_wall_local.append([[wall_exit[0][0], wall_exit[0][1]], [door_x, door_y]])
@@ -694,7 +735,7 @@ def add_cellar(x,y,
                     else:
                         # Всё норм, совпадений нет, выходи
                         break
-
+            coord_outer_luke = [door_x, door_y]
             ar_doors_local.append([[door_x, door_y], [door_x, door_y + cell]])
 
             ar_wall_local.append([[wall_exit[0][0], wall_exit[0][1]], [door_x, door_y]])
@@ -710,4 +751,5 @@ def add_cellar(x,y,
         else:
             exit("Неизвестное направление")
 
-    return ar_wall_local, ar_doors_local
+    return {"ar_walls":ar_wall_local, 'ar_doors':ar_doors_local, 'coord_outer_luke': coord_outer_luke,
+            'direct_outer_luke': dol}

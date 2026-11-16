@@ -36,7 +36,7 @@ def tile_add_action(tile, action, params=None, indx=None):
     """Добавляет действие (триггер) к тайлу.
 
     Args:
-        tile: Тайл, к которому добавляется действие.
+        tile: Тайл, к которому добавляется действие.\n
         action: Варианты действия\n
             method - В VTT(Перенаправление на основе метода). В param добавьте
             {"goto": "Куда направить", "method": "Какой метод(enter,... )"}.\n
@@ -47,14 +47,14 @@ def tile_add_action(tile, action, params=None, indx=None):
                 "goto": "Переход ко входу при провале"(необязательно),
                 "value": "Значение"}\n
             setvariable - В VTT(Выставление переменной). В param добавьте {"var": "Имя переменной",
-                "value": "Значение переменной", "tag": "Тэг другого тайла(не обязательно, если тайл текущий)"}
+                "value": "Значение переменной", "tag": "Тэг другого тайла(не обязательно, если тайл текущий)"}\n
             elevation - В VTT(Высота). В param добавьте {"elevation": "Нужная высота"}\n
             enter - В VTT(Вход). В param добавьте {"name": "Имя входа"}\n
             playertype - В VTT(Перенаправление в зависимости от от типа игрока).
                 В param добавьте {"gm": "куда направить гм-а", "player": "куда направить игрока"}\n
             tileimage - В VTT(Переключение изображения тайла). В param добавьте
                 {"tag": "сущность"(не обязательно, если текущий тайл),"select": "Номер изображения", }\n
-            text - В VTT(Всплывающий текст). В param добавьте {"text": "текст"}
+            text - В VTT(Всплывающий текст). В param добавьте {"text": "текст"}\n
         params: Необязательные параметры действия.
     """
 
@@ -73,15 +73,19 @@ def tile_add_action(tile, action, params=None, indx=None):
                         "id": generate_id(16)
                     }
     elif action == "checkvariable":
+        if params.get("tag") is None:
+            entity = ''
+        else:
+            entity = {
+                  "id": f"tagger:{params['tag']}",
+                  "match": "all",
+                  "scene": "_active",
+                  "name": f"<i class=\"fas fa-tag fa-sm\"></i> {params['tag']}"
+                }
         new_action = {
           "action": "checkvariable",
           "data": {
-            "entity": {
-              "id": f"tagger:{params['tag']}",
-              "match": "all",
-              "scene": "_active",
-              "name": f"<i class=\"fas fa-tag fa-sm\"></i> {params['tag']}"
-            },
+            "entity": entity,
             "type": "all",
             "name": params["var"],
             "value": str(params["value"]),
@@ -90,7 +94,7 @@ def tile_add_action(tile, action, params=None, indx=None):
           "id": generate_id(16)
         }
     elif action == "setvariable":
-        if params['tag'] is None:
+        if params.get('tag') is None:
             entity = ""
         else:
             entity = {
@@ -139,7 +143,7 @@ def tile_add_action(tile, action, params=None, indx=None):
                   "id": generate_id(16)
                 }
     elif action == 'tileimage':
-        if params['tag'] is None:
+        if params.get('tag') is None:
             entity = {
                       "id": "tile",
                       "name": "Этот тайл"
@@ -187,3 +191,5 @@ def tile_add_action(tile, action, params=None, indx=None):
         actions_list.insert(indx,new_action)
     tile["flags"]["monks-active-tiles"]['actions'] = actions_list
     return tile
+
+

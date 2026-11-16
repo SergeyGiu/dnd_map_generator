@@ -59,3 +59,5 @@ def extend_square(point1,point2,point3,point4, cell, padding_w, padding_h, heigh
             else:
                 point4 += cell
     return point1, point2, point3, point4
+
+
