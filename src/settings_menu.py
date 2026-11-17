@@ -1,10 +1,10 @@
 import os
 
-from src.utils import read_conf,write_conf
+from src.utils import read_conf,write_conf,clear_console
 
 def menu():
     while True:
-        os.system('cls')  # Windows
+        clear_console()  # Windows
         conf = read_conf()
         lang = conf['lang']
 
@@ -26,7 +26,7 @@ def menu():
 
 def menu_settings_output():
     while True:
-        os.system('cls')
+        clear_console()
         conf = read_conf()
         lang = conf['lang']
 
@@ -39,14 +39,14 @@ def menu_settings_output():
         if num == '0' or num == '':
             break
         elif num == '1':
-            os.system('cls')
+            clear_console()
             print(f'{conf[lang]["name_module"]} ({conf["module_settings"]["name_module"]})')
             new_num = input(f'{conf[lang]["en_new_num"]} ')
             if new_num != "":
                 conf['module_settings']['name_module'] = new_num
                 write_conf(conf)
         elif num == '2':
-            os.system('cls')
+            clear_console()
             print(f'{conf[lang]["name_module_date"]} '
                   f'({conf["module_settings"]["name_module_date"]})')
             print(f'0-{conf[lang]["back"]}')
@@ -64,7 +64,7 @@ def menu_settings_output():
 
 def menu_choice_lang():
     while True:
-        os.system('cls')  # Windows
+        clear_console()  # Windows
         conf = read_conf()
         lang = conf['lang']
         lang_available = conf['lang_available']
@@ -86,7 +86,7 @@ def menu_choice_lang():
 
 def menu_map_settings():
     while True:
-        os.system('cls')
+        clear_console()
         conf = read_conf()
         lang = conf['lang']
         print(f'0-{conf[lang]["back"]}')
@@ -100,7 +100,7 @@ def menu_map_settings():
         if num == '0' or num == '':
             break
         elif num == '1':
-            os.system('cls')
+            clear_console()
             print(f'{conf[lang]["map"]["cell_size_px"]} '
                   f'({conf["map_settings"]["cell_size_px"]})')
             new_num = input(f'{conf[lang]["en_new_num"]} ')
@@ -112,7 +112,7 @@ def menu_map_settings():
                 except TypeError:
                     pass
         elif num == '2':
-            os.system('cls')
+            clear_console()
             print(f'{conf[lang]["map"]["cell_size_px"]} '
                   f'({conf["map_settings"]["padding"]})')
             new_num = input(f'{conf[lang]["en_new_num"]} ')

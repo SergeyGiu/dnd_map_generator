@@ -1,7 +1,38 @@
 import json
+import os
 import random
 import string
 import math
+
+def init_os():
+    """определить операционную систему"""
+    import platform
+
+    # Получить краткое имя системы (Windows, Linux, Darwin, ...)
+    os_name = platform.system()
+
+    if os_name == "Windows":
+        return "Windows"
+    elif os_name == "Linux":
+        return "Linux"
+    elif os_name == "Darwin":
+        return "macOS"
+    else:
+        print(f"Неизвестная система: {os_name}")
+
+def clear_console():
+    conf = read_conf()
+    my_os = conf.get("os")
+    if my_os == "Windows":
+        os.system("cls")
+    elif my_os == "Linux":
+        os.system("clear")
+    elif my_os == "MacOS":
+        os.system("clear")
+    else:
+        exit("Неизвестная ОС")
+
+
 def read_conf():
     try:
         with open('conf/language.json', 'r', encoding='utf-8') as f:

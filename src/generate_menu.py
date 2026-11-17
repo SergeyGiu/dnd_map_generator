@@ -1,6 +1,6 @@
 import os
 import shutil
-from src.utils import read_conf
+from src.utils import read_conf, clear_console
 from src.Module import Module
 
 def delete_tmp_module(folder= "output/module_tmp"):
@@ -9,7 +9,7 @@ def delete_tmp_module(folder= "output/module_tmp"):
     return folder
 
 def menu():
-    os.system('cls')  # Windows
+    clear_console()  # Windows
     conf = read_conf()
     title = f"{conf['module_settings']['name_module']}".replace(' ', '-')
     folder = f'output/{title}'
@@ -18,7 +18,7 @@ def menu():
     module = Module(title=title)
 
     while True:
-        os.system('cls')  # Windows
+        clear_console()
 
 
         conf = read_conf()
@@ -44,7 +44,7 @@ def menu():
 def menu_add_scene(module):
     def change_size(data_local):
         while True:
-            os.system('cls')
+            clear_console()
             conf = read_conf()
             lang = conf['lang']
             x = data_local['width']
@@ -63,7 +63,7 @@ def menu_add_scene(module):
 
     def change_type_scene(data_local):
         while True:
-            os.system('cls')
+            clear_console()
             conf = read_conf()
             lang = conf['lang']
             print(f'{conf[lang]["en_new_type_scene"]} ({data_local["type_scene"]})')
@@ -93,7 +93,7 @@ def menu_add_scene(module):
             "cell": conf["map_settings"]["cell_size_px"],
             "module_name": conf["module_settings"]["name_module"],}
     while True:
-        os.system('cls')
+        clear_console()
         conf = read_conf()
         lang = conf['lang']
         print(f'{conf[lang]["settings_scene"]}')
