@@ -169,7 +169,7 @@ class Module:
             f.write('packs/** binary')
 
     def add_scene(self,name="",height = 1000,width=1000, padding=0.25,
-                  data = None):
+                  data = None, global_light = True):
         """Добавить сцену. Значит добавить json в папку scenes/_source"""
         if data.get('type_scene') is None: exit('Не задан тип сектора')
         if data.get('ruin_level') is None: exit('Не задан уровень разрушенности')
@@ -185,79 +185,169 @@ class Module:
                   [padding_w + data['width'], padding_h + data['height']],
                   [padding_w, data['height'] + padding_h]]
 
+        cell = data['cell']
         js_sector = gen_sector(id_scene=id_scene,
                               points=points,
                               type_sector=data.get('type_scene'),
                               ruin_lvl=data.get('ruin_level'),
-                              cell=data.get('cell'),
-                              module_name=data.get('module_name'),
+                              cell=cell,
+                              module_name=data['module_name'],
                                padding = 0.25
                               )
+        # Создать шаблон сцены
+        if name == "": name = id_scene
 
+
+        walls = js_sector['walls']
+        tiles = js_sector['tiles']
+
+        scene = {
+          "name": name,
+          "navigation": False,
+          "navOrder": 0,
+          "navName": "",
+          "background": {
+            "src": None,
+            "anchorX": 0,
+            "anchorY": 0,
+            "offsetX": 0,
+            "offsetY": 0,
+            "fit": "fill",
+            "scaleX": 1,
+            "scaleY": 1,
+            "rotation": 0,
+            "tint": "#ffffff",
+            "alphaThreshold": 0
+          },
+          "foreground": None,
+          "foregroundElevation": 20,
+          "thumb": None,
+          "width": width,
+          "height": height,
+          "padding": padding,
+          "initial": {
+            "x": None,
+            "y": None,
+            "scale": 0.5
+          },
+          "backgroundColor": "#999999",
+          "grid": {
+            "type": 1,
+            "size": cell,
+            "style": "solidLines",
+            "thickness": 1,
+            "color": "#000000",
+            "alpha": 0.2,
+            "distance": 5,
+            "units": "ft"
+          },
+          "tokenVision": True,
+          "fog": {
+            "exploration": False,
+            "overlay": None,
+            "colors": {
+              "explored": None,
+              "unexplored": None
+            }
+          },
+          "environment": {
+            "darknessLevel": 0,
+            "darknessLock": False,
+            "globalLight": {
+              "enabled": global_light,
+              "alpha": 0.5,
+              "bright": False,
+              "color": None,
+              "coloration": 1,
+              "luminosity": 0,
+              "saturation": 0,
+              "contrast": 0,
+              "shadows": 0,
+              "darkness": {
+                "min": 0,
+                "max": 1
+              }
+            },
+            "cycle": True,
+            "base": {
+              "hue": 0,
+              "intensity": 0,
+              "luminosity": 0,
+              "saturation": 0,
+              "shadows": 0
+            },
+            "dark": {
+              "hue": 0.7138888888888889,
+              "intensity": 0,
+              "luminosity": -0.25,
+              "saturation": 0,
+              "shadows": 0
+            }
+          },
+          "drawings": [],
+          "tokens": [],
+          "lights": [],
+          "notes": [],
+          "sounds": [],
+          "regions": [],
+          "templates": [],
+          "tiles": tiles,
+          "walls": walls,
+          "playlist": None,
+          "playlistSound": None,
+          "journal": None,
+          "journalEntryPage": None,
+          "weather": "",
+          "folder": None,
+          "ownership": {
+            "default": 0,
+            "gwA7Bkmj54EdZvsA": 3
+          },
+          "flags": {},
+          "_stats": {
+            "compendiumSource": None,
+            "duplicateSource": None,
+            "coreVersion": "12.331",
+            "systemId": "dnd5e",
+            "systemVersion": "4.4.2",
+            "createdTime": 1793968374286,
+            "modifiedTime": 1793968430130,
+            "lastModifiedBy": "gwA7Bkmj54EdZvsA"
+          },
+          "_id": id_scene,
+          "active": False,
+          "sort": 100000,
+          "_key": f"!scenes!{id_scene}",
+          "levels": []
+        }
+
+
+        '''# Взять образец сцены
         with open('example_jsons/fvtt_Scene.json', 'r', encoding='utf-8') as f:
-            scene = json.load(f)
+            scene = json.load(f)'''
 
 
-        if name == "": title = id_scene
-        else: title = name
-
-        from src.generate_sector.house_001.main_gen import start_generate
-
-        scene['name'] = title
-
-        scene['_id'] = id_scene
-        scene['_key'] = f'!scenes!{id_scene}'
-
-
-        js = start_generate(data=data, key = id_scene)
-        if data is not None:
-            if data.get('width') is not None: scene['width'] = data['width']
-            else: scene['width'] = width
-
-            if data.get('height') is not None: scene['height'] = data['height']
-            else: scene['height'] = height
-
-            if data.get('padding') is not None: scene['padding'] = data['padding']
-            else: scene['padding'] = padding
-
-
-
-        '''data = {'width':1000, "height":1000,
-            "type_scene": conf["map_settings"]["type_scenes"][0],
-            "snow_lvl": 0, "biome": "forest", "ruin_level": 0,
-            "overgrowth_level": 0, "abandonment_level": 0,
-            'padding': conf["map_settings"]["padding"],
-            "cell": conf["map_settings"]["cell_size_px"],
-            "module_name": conf["module_settings"]["name_module"],}
-            '''
-
-
-
-
-
-        scene['walls'] = js['walls']
-        scene['tiles'] = js['tiles']
         scene['flags'] = {
-    "levels": {
-      "sceneLevels": [
-        [
-          "-10",
-          "-1",
-          ""
-        ],
-        [
-          "0",
-          "9",
-          ""
-        ],
-        [
-          "10",
-          "19",
-          ""
-        ]
-      ]
-    }
-  }
+            "levels": {
+              "sceneLevels": [
+                [
+                  "-10",
+                  "-1",
+                  ""
+                ],
+                [
+                  "0",
+                  "9",
+                  ""
+                ],
+                [
+                  "10",
+                  "19",
+                  ""
+                ]
+              ]
+            }
+          }
 
 
 

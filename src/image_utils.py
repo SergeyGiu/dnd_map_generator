@@ -1,4 +1,4 @@
-from PIL import Image, ImageDraw, ImageFont, ImageFilter, ImageOps
+from PIL import Image, ImageFilter, ImageOps
 
 from src.utils import generate_id
 
@@ -227,8 +227,6 @@ def get_top_left_point(polygon):
 def gen_tile_wall(data):
     import math
 
-    import math
-
     def line_to_polygon(line: list, offset: float,
                         extend: float = 0) -> list[tuple[int, int]]:
         """
@@ -284,7 +282,6 @@ def gen_tile_wall(data):
     info = get_image_info(img)
 
     save_image(img, path)
-    print(polygon)
     gen_tile = generate_id(16)
 
     js_tile = {
@@ -306,7 +303,7 @@ def gen_tile_wall(data):
         "width": info['width'],
         "height": info['height'],
         "elevation": elevation,
-        "sort": 9,
+        "sort": 8,
         "occlusion": {
             "mode": 0,
             "alpha": 0
@@ -337,16 +334,6 @@ def gen_tile_wall(data):
         "_key": f"!scenes.tiles!{key}.{gen_tile}"
     }
     return js_tile
-
-import numpy as np
-from PIL import Image, ImageDraw
-from scipy.ndimage import distance_transform_edt
-
-
-import numpy as np
-from PIL import Image, ImageDraw
-from scipy.ndimage import distance_transform_edt
-
 
 import numpy as np
 from PIL import Image, ImageDraw

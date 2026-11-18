@@ -1,7 +1,7 @@
 import random
 from doctest import debug
+from src.utils import Color
 
-import src.image_utils
 from src.utils import generate_id, distance_2d
 from PIL import Image
 from src.image_utils import *
@@ -88,77 +88,61 @@ def start_generate(data):
 
     type_scene = data.get('type_scene')
     biome = data.get('biome')
-    module_name = data.get('module_name')
     sector = data['sector']
     key = sector.id_scene
     cell = sector.cell
     points = sector.points
+    module_name = sector.module_name
     direct = sector.direct
-    print("Входные данные house_001:")
-    print("--->Класс сектор", sector)
-    print("--->id сцены:", key)
-    print('--->Размер ячейки', cell)
-    print("--->Границы сектора", points)
-    print("--->Направление сектора", direct)
-
+    print(f"{Color.YELLOW}Входные данные house_001:")
+    print(f"--->Класс сектор:", sector)
+    print(f"--->id сцены:", key)
+    print(f'--->Имя модуля:', module_name)
+    print(f'--->Размер ячейки:', cell)
+    print(f"--->Границы сектора:", points, Color.WHITE)
+    #print("--->Направление сектора", direct)
     walls = []  # Массив стен, окон, дверей в итоговом формате
     light = []  # Массив источников света
     tiles = []  # Массив тайлов
 
     doors_raw = [] # Массив дверей в сыром виде
+    windows_raw = []
+    start_point = src.generate_sector.house_001.utils.create_start_point(
+                                    direct=direct,points=points,cell = cell)
 
-    src.generate_sector.house_001.utils.create_start_point(direct=direct,points=points,
-                                                           cell = cell)
-
-
-    width = data['width']
-    height = data['height']
-    padding = data['padding']
-
-    padding_h = int(height * padding)
-    padding_w = int(width * padding)
-
-
-
-
-
-    # Метод наращивания помещения. Строим центр, а затем расширяем дом в одном из направлений x раз
-    # Дом должен стоять в противоположном направлении от direct.
-    # То есть при up - дом в нижней части карты.
-
-    # Центр отсчёта дома
-    point_x1,point_y1,point_x2,point_y2  = create_start_point3(direct_local=direct,
-                                                               padding_w=padding_w,
-                                                               padding_h=padding_h,
-                                                               cell=cell,
-                                                               width=width,
-                                                               height=height)
-    print('Центр отсчёта здания:', point_x1, point_y1)
-
-    # Расширяем исходную точку в рандомных направлениях, чтобы получить здание
-    point_x1, point_y1, point_x2, point_y2 = extend_square(point_x1, point_y1, point_x2, point_y2,
-                                                           cell, padding_w, padding_h,
-                                                           height, width)
-
-    # Добавляем люк
+    boarders = src.generate_sector.house_001.utils.extend_square(
+                            start_point,polygon=points, cell=cell)
+    x1,y1,x2,y2 = boarders[0],boarders[1],boarders[2],boarders[3]
 
     # Сырой массив стен
-    walls_raw = [[(point_x1, point_y1), (point_x2, point_y1)],
-                [(point_x2, point_y1), (point_x2, point_y2)],
-                [(point_x1, point_y2),(point_x2, point_y2)],
-                [(point_x1, point_y1), (point_x1, point_y2)]]
+    walls_raw = [[(x1, y1), (x2, y1)],
+                [(x2, y1), (x2, y2)],
+                [(x1, y2),(x2, y2)],
+                [(x1, y1), (x1, y2)]]
 
-    # В одной из стен создать дыру для двери в зависимости от direct
-    walls_raw,doors_ = cut_door(walls_raw, direct_local=direct)
-    doors_raw.extend(doors_)
+    if direct == 'up':
+        print(f'{Color.CYAN}Режем верхнюю стену, чтобы получить дверь')
+        ar_wall, ar_door = src.utils.cut_hole_in_wall(wall = walls_raw.pop(0),cell = cell)
+        ar_wall2, ar_windows = src.utils.cut_hole_in_wall(wall = walls_raw,cell = cell)
+    elif direct == 'right':
+        print(f'{Color.CYAN}Режем правую стену, чтобы получить дверь')
+        ar_wall, ar_door = src.utils.cut_hole_in_wall(wall=walls_raw.pop(1),cell=cell)
+        ar_wall2, ar_windows = src.utils.cut_hole_in_wall(wall = walls_raw,cell = cell)
+    elif direct == 'down':
+        print(f'{Color.CYAN}Режем нижнюю стену, чтобы получить дверь')
+        ar_wall, ar_door = src.utils.cut_hole_in_wall(wall=walls_raw.pop(2),cell=cell)
+        ar_wall2, ar_windows = src.utils.cut_hole_in_wall(wall = walls_raw,cell = cell)
+    else:
+        print(f'{Color.CYAN}Режем левую стену, чтобы получить дверь')
+        ar_wall, ar_door = src.utils.cut_hole_in_wall(wall=walls_raw.pop(3),cell=cell)
+        ar_wall2, ar_windows = src.utils.cut_hole_in_wall(wall = walls_raw,cell = cell)
 
+    walls_raw = ar_wall
+    walls_raw.extend(ar_wall2)
 
-    # Делаем окна (пропущено)
+    windows_raw.extend(ar_windows)
+    doors_raw.extend(ar_door)
 
-    # Объявим базовый уровень
-
-
-    print('Массив сырых стен:', walls_raw)
     # Переводим в нужный формат стены и добавляем к ним тайлы
     for i in range(len(walls_raw)):
         gen_id = generate_id(16)
@@ -198,8 +182,7 @@ def start_generate(data):
                      "range_top": 9,
                      'elevation':0
                      }
-
-        tile = src.image_utils.gen_tile_wall(data_tile)
+        tile = gen_tile_wall(data_tile)
         tiles.append(tile)
         walls.append(js)
 
@@ -232,15 +215,15 @@ def start_generate(data):
             },
             "_key": f"!scenes.walls!{key}.{gen_id}"
         }
-
-        door_img = src.image_utils.open_image('images/texture_wood/wood_door_001.png')
-        door_img = src.image_utils.resize_image(door_img, cell, cell)
-        path_tile = f'output/{module_name}/assets/wood_door_001.png'
-        path_tile_ = f'modules/{module_name}/assets/wood_door_001.png'
+        gen_tile = generate_id(16)
+        door_img = open_image('images/texture_wood/wood_door_001.png')
+        door_img = resize_image(door_img, cell, cell)
+        path_tile = f'output/{module_name}/assets/wood_door_001_{gen_tile}.png'
+        path_tile_ = f'modules/{module_name}/assets/wood_door_001_{gen_tile}.png'
         save_image(door_img, path_tile)
         left_top = [doors_raw[i][0][0], doors_raw[i][0][1]-cell//2]
 
-        gen_tile = generate_id(16)
+
         js_tile = {
             "texture": {
                 "src": path_tile_,
@@ -261,6 +244,90 @@ def start_generate(data):
             "height": cell,
             "elevation": 0,
             "sort": 8,
+            "occlusion": {
+                "mode": 0,
+                "alpha": 0
+            },
+            "_id": gen_tile,
+            "rotation": 0,
+            "alpha": 1,
+            "hidden": False,
+            "locked": False,
+            "restrictions": {
+                "light": False,
+                "weather": False
+            },
+            "video": {
+                "loop": True,
+                "autoplay": True,
+                "volume": 0
+            },
+            "flags": {},
+            "_key": f"!scenes.tiles!{key}.{gen_tile}"
+        }
+        tiles.append(js_tile)
+        walls.append(js)
+
+    for i in range(len(windows_raw)):
+        gen_id = generate_id(16)
+        js = {
+          "light": 30,
+          "sight": 30,
+          "sound": 20,
+          "move": 20,
+          "threshold": {
+            "light": 10,
+            "sight": 10,
+            "attenuation": True,
+            "sound": None
+          },
+          "c": [
+            windows_raw[i][0][0],
+            windows_raw[i][0][1],
+            windows_raw[i][1][0],
+            windows_raw[i][1][1]
+          ],
+          "_id": gen_id ,
+          "dir": 0,
+          "door": 0,
+          "ds": 0,
+          "flags": {
+            "wall-height": {
+              "bottom": 0,
+              "top": 9
+            }
+          },
+          "_key": f"!scenes.walls!{key}.{gen_id}"
+        }
+
+        gen_tile = generate_id(16)
+        door_img = open_image('images/texture_glass/glass_001.png')
+        door_img = resize_image(door_img, cell, cell)
+        path_tile = f'output/{module_name}/assets/glass_001_{gen_tile}.png'
+        path_tile_ = f'modules/{module_name}/assets/glass_001_{gen_tile}.png'
+        save_image(door_img, path_tile)
+        left_top = [windows_raw[i][0][0], windows_raw[i][0][1]-cell//2]
+
+        js_tile = {
+            "texture": {
+                "src": path_tile_,
+                "anchorX": 0.5,
+                "anchorY": 0.5,
+                "offsetX": 0,
+                "offsetY": 0,
+                "fit": "fill",
+                "scaleX": 1,
+                "scaleY": 1,
+                "rotation": 0,
+                "tint": "#ffffff",
+                "alphaThreshold": 0.75
+            },
+            "x": left_top[0],
+            "y": left_top[1],
+            "width": cell,
+            "height": cell,
+            "elevation": 0,
+            "sort": 9,
             "occlusion": {
                 "mode": 0,
                 "alpha": 0
@@ -371,8 +438,8 @@ def start_generate(data):
 
     # Рандомим будет ли погреб
     if random.randint(1, 100) > 0:
-        luke = {"x": random.randrange(point_x1, point_x2, cell),
-                "y": random.randrange(point_y1, point_y2, cell),
+        luke = {"x": random.randrange(x1, x2, cell),
+                "y": random.randrange(y1, y2, cell),
                 'key': key,
                 'module_name': module_name,
                 'elevation': 0,
@@ -454,7 +521,7 @@ def start_generate(data):
                          'range_top': -1,
                          "elevation": -10,
                          }
-            tile = src.image_utils.gen_tile_wall(data_tile)
+            tile = gen_tile_wall(data_tile)
             tiles.append(tile)
             walls.append(js)
             walls_cellar_dict.append(js)

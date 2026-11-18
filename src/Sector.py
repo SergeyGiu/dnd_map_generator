@@ -27,3 +27,6 @@ class Sector:
         self.points = points
         self.cell = cell
         self.direct = direct
+        self.module_name = module_name
+        self.type_sector = type_sector
+        self.ruin_lvl = ruin_lvl

@@ -1,10 +1,12 @@
 import random
+from typing import Union, Callable, Any
 
 import src.Sector
 import importlib
 
 
-def gen_sector(id_scene,cell, points, type_sector,module_name,padding, ruin_lvl=0) -> dict:
+def gen_sector(id_scene,cell, points, type_sector,module_name,padding, ruin_lvl=0) -> \
+Union[Callable, Any]:
     """Начало и конец серии генераций
     id_scene - id сцены
     points - координаты вершин сектора. За них постройка не выйдет ни на пиксель
@@ -23,7 +25,6 @@ def gen_sector(id_scene,cell, points, type_sector,module_name,padding, ruin_lvl=
                      cell = cell,
                      module_name = module_name,
                      direct = direct)
-    print("Тип сектора",type_sector)
 
     # 1. Формируем полный путь к модулю
     module_path = f"src.generate_sector.{type_sector}.main_gen"
@@ -42,6 +43,7 @@ def gen_sector(id_scene,cell, points, type_sector,module_name,padding, ruin_lvl=
         # 4. Вызываем функцию
         if callable(start_generate):
             info_sector = start_generate(data = data)
+            return info_sector
         else:
             print("Функция start_generate не найдена или не является вызываемой")
 

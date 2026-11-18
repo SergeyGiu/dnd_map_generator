@@ -1,5 +1,7 @@
 import random
 
+import src.utils
+from src.utils import Color
 from PIL.Image import radial_gradient
 
 
@@ -93,32 +95,131 @@ def create_start_point(direct, points, cell, offset=None):
     center = find_center_polygon(polygon=points, cell = cell)
     min_x = find_leftmost_point(polygon=points, cell=cell)
     max_x = find_rightmost_point(polygon=points,cell = cell)
-    min_y = find_bottommost_point(polygon=points, cell=cell)
-    max_y = find_topmost_point(polygon=points, cell=cell)
-    print("Поиск стартовой точки...")
+    max_y = find_bottommost_point(polygon=points, cell=cell)
+    min_y = find_topmost_point(polygon=points, cell=cell)
+
+
+
+    print(f"{Color.MAGENTA}Поиск стартовой точки...")
     print("---> Минимальное расстояние до края:", offset)
     print("---> Массив стен", walls)
-    print("-----> Координаты центра", center)
+    print(f"-----> Координаты центра", center)
     print("-----> Самая левая точка", min_x)
     print("-----> Самая правая точка", max_x)
     print("-----> Самая верхняя точка", min_y)
     print("-----> Самая нижняя точка", max_y)
-    print("---> Направление сектора:", direct)
-
+    print(f"{Color.CYAN}---> Направление сектора:", direct)
     if direct == "up":
-        print("---->Значит сдвигаем дом в нижнюю часть")
+        print(f"---->Значит сдвигаем дом в нижнюю часть")
+        y_board = center[1]
+        cnt_error = 0
         while True:
             x = random.randrange(min_x[0], max_x[0], cell)
-            y = random.randrange(min_y[1],center[1], cell)
+            y = random.randrange(y_board, max_y[1], cell)
+            distance, indx_wall = src.utils.min_distance_to_walls(walls=walls, point=(x,y))
+            if distance < offset:
+                if y_board < min_y[1]:
+                    cnt_error += 1
+                    if cnt_error > 100:
+                        print(f"{Color.RED}---->Не удалось найти точку свободную{Color.WHITE}")
+                        return 0
+                else:
+                    y_board -= cell
+                print(f'{Color.RED}Получили координату {x}:{y}. Минимальное расстояние={distance}. Расширяем зону center={x}:{y_board}{Color.WHITE}')
 
+            else:
+                res, indx_hits = src.utils.segment_hits_any_wall(
+                    walls=walls,segment=[center,[x, y]])
+                if res:
+                    print(f'{Color.RED}Точка {x}:{y} прошла проверка дальности от стен, находится по другую сторону от края сектора{Color.WHITE}')
+                    continue
+                print(f'{Color.CYAN}Получили координату {x}:{y}. Минимальное расстояние={distance}{Color.WHITE}')
+                return [x, y]
     elif direct == "down":
-        print("---->Значит сдвигаем дом в верхнюю часть")
+        print(f"---->Значит сдвигаем дом в верхнюю часть{Color.WHITE}")
+        y_board = center[1]
+        cnt_error = 0
+        while True:
+            x = random.randrange(min_x[0], max_x[0], cell)
+            y = random.randrange(min_y[1], y_board, cell)
+            distance, indx_wall = src.utils.min_distance_to_walls(
+                walls=walls,point=(x,y))
+            if distance < offset:
+                if y_board > max_y[1]:
+                    cnt_error += 1
+                    if cnt_error > 100:
+                        print(f"{Color.RED}---->Не удалось найти точку свободную{Color.WHITE}")
+                        return 0
+                else:
+                    y_board += cell
+                print(f'{Color.RED}Получили координату {x}:{y}. Минимальное расстояние={distance}. Расширяем зону center={x}:{y_board}{Color.WHITE}')
+
+            else:
+                res, indx_hits = src.utils.segment_hits_any_wall(
+                    walls=walls, segment=[center, [x, y]])
+                if res:
+                    print(f'{Color.RED}Точка {x}:{y} прошла проверка дальности от стен, находится по другую сторону от края сектора{Color.WHITE}')
+                    continue
+                print(f'{Color.CYAN}Получили координату {x}:{y}. Минимальное расстояние={distance}{Color.WHITE}')
+                return [x,y]
     elif direct == "left":
-        print("---->Значит сдвигаем дом в правую часть")
+        print(f"---->Значит сдвигаем дом в правую часть{Color.WHITE}")
+        x_board = center[0]
+        cnt_error = 0
+        while True:
+            x = random.randrange(x_board, max_x[0], cell)
+            y = random.randrange(min_y[1], max_y[1], cell)
+            distance, indx_wall = src.utils.min_distance_to_walls(
+                walls=walls,point=(x,y))
+            if distance < offset:
+                if x_board < min_x[0]:
+                    cnt_error += 1
+                    if cnt_error > 100:
+                        print(f"{Color.RED}---->Не удалось найти точку свободную{Color.WHITE}")
+                        return 0
+                else:
+                    x_board -= cell
+                print(f'{Color.RED}Получили координату {x}:{y}. Минимальное расстояние={distance}. Расширяем зону center={x}:{x_board}{Color.WHITE}')
+
+            else:
+                res, indx_hits = src.utils.segment_hits_any_wall(
+                    walls=walls, segment=[center, [x, y]])
+                if res:
+                    print(f'{Color.CYAN}Точка {x}:{y} прошла проверка дальности от стен, находится по другую сторону от края сектора{Color.WHITE}')
+                    continue
+                print(f'{Color.GREEN}Получили координату {x}:{y}. Минимальное расстояние={distance}{Color.WHITE}')
+                return [x,y]
     elif direct == "right":
-        print("---->Значит сдвигаем дом в левую часть")
+        print(f"---->Значит сдвигаем дом в левую часть{Color.WHITE}")
+        x_board = center[0]
+        cnt_error = 0
+        while True:
+            x = random.randrange(min_x[0], x_board, cell)
+            y = random.randrange(min_y[1], max_y[1], cell)
+            distance, indx_wall = src.utils.min_distance_to_walls(
+                walls=walls,point=(x,y))
+            if distance < offset:
+                if x_board > max_x[0]:
+                    cnt_error += 1
+                    if cnt_error > 100:
+                        print(f"{Color.RED}---->Не удалось найти точку свободную{Color.WHITE}")
+                        return 0
+                else:
+                    x_board += cell
+                print(f'{Color.RED}Получили координату {x}:{y}. Минимальное расстояние={distance}. Расширяем зону center={x}:{x_board}{Color.WHITE}')
+
+            else:
+                res, indx_hits = src.utils.segment_hits_any_wall(
+                    walls=walls, segment=[center, [x, y]])
+                if res:
+                    print(f'{Color.RED}Точка {x}:{y} прошла проверка дальности от стен, находится по другую сторону от края сектора{Color.WHITE}')
+                    continue
+                print(f'{Color.CYAN}Получили координату {x}:{y}. Минимальное расстояние={distance}{Color.WHITE}')
+                return [x,y]
     else:
         exit('Неизвестное направление')
+
+
 
 def create_start_point3(direct_local, padding_w, padding_h, cell, width, height):
     # Определяем стартовую точку отсчёта
@@ -150,7 +251,80 @@ def create_start_point3(direct_local, padding_w, padding_h, cell, width, height)
     return local_point_x1, local_point_y1, local_point_x2, local_point_y2
 
 
-def extend_square(point1,point2,point3,point4, cell, padding_w, padding_h, height,width):
+def extend_square(start_point, polygon, cell, offset=None):
+    """Расширитель здания, но не дальше ограничений polygon"""
+    if offset is None: offset = cell * 4
+    x1,y1 = start_point
+    x2,y2 = x1+cell, y1+cell
+
+    flag_up = False
+    flag_down = False
+    flag_left = False
+    flag_right = False
+    print(f'{Color.YELLOW}Расширяем точку для получения очертания дома')
+    for _ in range(random.randint(4, 7)):
+        dir = random.randint(0, 1) # Выбирается направление
+        if dir == 0:  # Движение влево
+            buf_point = [x1-cell, y1]
+            distance, indx = src.utils.min_distance_point_to_polygon(
+                point=buf_point, polygon=polygon) # Смотрим дистанцию точки
+            if distance < offset or flag_left:
+                flag_left = True # Сдвигаться левее больше нельзя
+                if not flag_right: # А вправо можно?
+                    x2 += cell
+            else:
+                '''print(f'{Color.YELLOW}Дистанция новой точки x1:y1'
+                      f'{buf_point}={distance}{Color.WHITE}')'''
+                x1 -= cell
+        else:  # Движение вправо (dir == 1)
+            buf_point = [x2 + cell, y2]
+            distance, indx = src.utils.min_distance_point_to_polygon(
+                point=buf_point, polygon=polygon)  # Смотрим дистанцию точки
+            if distance < offset or flag_right:
+                flag_right = True  # Сдвигаться правее больше нельзя
+                if not flag_left:  # А влево можно?
+                    x1 -= cell
+            else:
+                '''print(f'{Color.YELLOW}Дистанция новой точки x2:y2'
+                      f'{buf_point}={distance}{Color.WHITE}')'''
+                x2 += cell
+    for _ in range(random.randint(4, 7)):
+        dir = random.randint(0, 1) # Выбирается направление
+        if dir == 0:  # Движение вверх
+            buf_point = [x1, y1 - cell]
+            distance, indx = src.utils.min_distance_point_to_polygon(
+                point=buf_point, polygon=polygon)  # Смотрим дистанцию точки
+            if distance < offset or flag_up:
+                flag_up = True  # Сдвигаться выше больше нельзя
+                if not flag_down:  # А вниз можно?
+                    y2 += cell
+            else:
+                '''print(f'{Color.YELLOW}Дистанция новой точки x1:y1'
+                      f'{buf_point}={distance}{Color.WHITE}')'''
+                y1 -= cell
+        else:  # Движение вниз (dir == 1)
+            buf_point = [x2, y2 + cell]
+            distance, indx = src.utils.min_distance_point_to_polygon(
+                point=buf_point, polygon=polygon)  # Смотрим дистанцию точки
+            if distance < offset or flag_down:
+                flag_down = True  # Сдвигаться ниже больше нельзя
+                if not flag_up:  # А вверх можно?
+                    y1 -= cell
+            else:
+                '''print(f'{Color.YELLOW}Дистанция новой точки x2:y2'
+                      f'{buf_point}={distance}{Color.WHITE}')'''
+                y2 += cell
+    print(f'--->Верхняя левая точка дома: {x1}:{y1}')
+    print(f'--->Правая нижняя точка дома: {x2}:{y2}')
+    print(f'----->Верхняя стена дома: {x1}:{y1} ; {x2}:{y1}')
+    print(f'----->Правая стена дома: {x2}:{y1} ; {x2}:{y2}')
+    print(f'----->Левая стена дома: {x1}:{y1} ; {x1}:{y2}')
+    print(f'----->Нижняя стена дома: {x1}:{y2} ; {x2}:{y2}{Color.WHITE}')
+
+    return [x1, y1, x2, y2]
+
+
+def extend_square3(point1, point2, point3, point4, cell, padding_w, padding_h, height, width):
     """Расширитель здания"""
     # Сперва раздвигаем x раз влево вправо
     for ix in range(random.randint(4, 7)):
