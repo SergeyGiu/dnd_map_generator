@@ -1,7 +1,9 @@
 import json
 import os
-from src.utils import generate_id
 
+import src.generate_sector
+from src.utils import generate_id
+from src.gen_sector import gen_sector
 '''{
   "id": "testclimodule",
   "title": "test_cli_module",
@@ -169,25 +171,45 @@ class Module:
     def add_scene(self,name="",height = 1000,width=1000, padding=0.25,
                   data = None):
         """Добавить сцену. Значит добавить json в папку scenes/_source"""
-        #scene2 = Scene()
+        if data.get('type_scene') is None: exit('Не задан тип сектора')
+        if data.get('ruin_level') is None: exit('Не задан уровень разрушенности')
+        if data.get('module_name') is None: exit('Не задано имя модуля')
+        if data.get('padding') is None: exit('Не задан padding')
 
+        id_scene = generate_id(16)
+        padding_w = data['width'] * data['padding']
+        padding_h = data['height'] * data['padding']
+
+        points = [[padding_w, padding_h],
+                  [padding_w + data['width'], padding_h],
+                  [padding_w + data['width'], padding_h + data['height']],
+                  [padding_w, data['height'] + padding_h]]
+
+        js_sector = gen_sector(id_scene=id_scene,
+                              points=points,
+                              type_sector=data.get('type_scene'),
+                              ruin_lvl=data.get('ruin_level'),
+                              cell=data.get('cell'),
+                              module_name=data.get('module_name'),
+                               padding = 0.25
+                              )
 
         with open('example_jsons/fvtt_Scene.json', 'r', encoding='utf-8') as f:
             scene = json.load(f)
 
-        gen = generate_id(16)
-        if name == "": title = gen
+
+        if name == "": title = id_scene
         else: title = name
 
-        from src.generate_scene.house_001.generate_main import start_generate
-
+        from src.generate_sector.house_001.main_gen import start_generate
 
         scene['name'] = title
 
-        scene['_id'] = gen
-        scene['_key'] = f'!scenes!{gen}'
+        scene['_id'] = id_scene
+        scene['_key'] = f'!scenes!{id_scene}'
 
-        js = start_generate(data=data, key = gen)
+
+        js = start_generate(data=data, key = id_scene)
         if data is not None:
             if data.get('width') is not None: scene['width'] = data['width']
             else: scene['width'] = width
@@ -197,6 +219,20 @@ class Module:
 
             if data.get('padding') is not None: scene['padding'] = data['padding']
             else: scene['padding'] = padding
+
+
+
+        '''data = {'width':1000, "height":1000,
+            "type_scene": conf["map_settings"]["type_scenes"][0],
+            "snow_lvl": 0, "biome": "forest", "ruin_level": 0,
+            "overgrowth_level": 0, "abandonment_level": 0,
+            'padding': conf["map_settings"]["padding"],
+            "cell": conf["map_settings"]["cell_size_px"],
+            "module_name": conf["module_settings"]["name_module"],}
+            '''
+
+
+
 
 
         scene['walls'] = js['walls']
@@ -226,7 +262,7 @@ class Module:
 
 
 
-        path = f'{self.folder}/packs/scenes/_source/{name}{gen}.json'
+        path = f'{self.folder}/packs/scenes/_source/{name}{id_scene}.json'
         js = {'path':path}
         self.scenes.append(js)
         with open(path, 'w', encoding='utf-8') as f:

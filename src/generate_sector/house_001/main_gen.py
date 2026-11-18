@@ -5,16 +5,33 @@ import src.image_utils
 from src.utils import generate_id, distance_2d
 from PIL import Image
 from src.image_utils import *
-from .check_input import check_input
 from .utils import *
 import src.add_tile
-import src.generate_scene.house_001.utils
-def start_generate(data, key):
+import src.generate_sector.house_001.utils
+from src.Sector import Sector
+# Эта функция отвечает за постройку однокомнатного
+#   дома с уличным туалетом и подвалом. Возвращает один js
+#   необходимыми тайлами, стенами, освещением и тд.
+# ВНИМАНИЕ
+# Тут не строится сама земля, только то что на самой земле.
+# Например огород на земле внутри сектора тут делается, но
+# сама земля делается не тут.
+#
+# ВАЖНО!!!
+# Глобальные настройки сцены тут не должны учавствовать.
+# Мы должны быть локально отделены
+
+
+
+
+def start_generate(data):
     """Основная функция для генерации сцены.
     На вход принимает словарь с параметрами.
     На выходе словарь, содержащий информацию об
-    стенах, лампах, путях до картинок и тд"""
-
+    стенах, лампах, путях до картинок и тд\n
+    data должен содержать\n
+        """
+    # Проверка входных данных
 
 
     def cut_door(walls_local, direct_local):
@@ -67,44 +84,55 @@ def start_generate(data, key):
 
         return walls_local,doors_raw_local
 
-    # Проверка входных данных
-    check_input(data)
-
     # Присваиваем данные
-    snow_lvl = int(data.get('snow_lvl'))
-    width = data.get('width')
-    height = data.get('height')
-    padding = data.get('padding')
+
     type_scene = data.get('type_scene')
     biome = data.get('biome')
-    cell = data.get('cell')
     module_name = data.get('module_name')
+    sector = data['sector']
+    key = sector.id_scene
+    cell = sector.cell
+    points = sector.points
+    direct = sector.direct
+    print("Входные данные house_001:")
+    print("--->Класс сектор", sector)
+    print("--->id сцены:", key)
+    print('--->Размер ячейки', cell)
+    print("--->Границы сектора", points)
+    print("--->Направление сектора", direct)
+
+    walls = []  # Массив стен, окон, дверей в итоговом формате
+    light = []  # Массив источников света
+    tiles = []  # Массив тайлов
+
+    doors_raw = [] # Массив дверей в сыром виде
+
+    src.generate_sector.house_001.utils.create_start_point(direct=direct,points=points,
+                                                           cell = cell)
+
+
+    width = data['width']
+    height = data['height']
+    padding = data['padding']
 
     padding_h = int(height * padding)
     padding_w = int(width * padding)
 
-    # direct - направление главного выхода с сектора
-    if data.get('direct') is None:
-        directs = ['up', 'down', 'left', 'right']
-        direct = random.choice(directs)
-    else: direct = data.get('direct')
 
-    walls = [] # Массив стен, окон, дверей в итоговом формате
-    light = [] # Массив источников света
-    tiles = [] # Массив тайлов
-    doors_raw = [] # Массив дверей в сыром виде
-    levels = [["-10", '-1', ""], ["0", "9", ""], ["10", "19"]] # Уровни сцены
+
+
+
     # Метод наращивания помещения. Строим центр, а затем расширяем дом в одном из направлений x раз
     # Дом должен стоять в противоположном направлении от direct.
     # То есть при up - дом в нижней части карты.
 
     # Центр отсчёта дома
-    point_x1,point_y1,point_x2,point_y2  = create_start_point(direct_local=direct,
-                                                              padding_w=padding_w,
-                                                              padding_h=padding_h,
-                                                              cell=cell,
-                                                              width=width,
-                                                              height=height)
+    point_x1,point_y1,point_x2,point_y2  = create_start_point3(direct_local=direct,
+                                                               padding_w=padding_w,
+                                                               padding_h=padding_h,
+                                                               cell=cell,
+                                                               width=width,
+                                                               height=height)
     print('Центр отсчёта здания:', point_x1, point_y1)
 
     # Расширяем исходную точку в рандомных направлениях, чтобы получить здание
@@ -170,16 +198,7 @@ def start_generate(data, key):
                      "range_top": 9,
                      'elevation':0
                      }
-        '''{
-        "betterroofs": {
-          "brMode": false
-        },
-        "levels": {
-          "rangeTop": 9,
-          "allWallBlockSight": false
-        }
-      }
-      '''
+
         tile = src.image_utils.gen_tile_wall(data_tile)
         tiles.append(tile)
         walls.append(js)
@@ -314,7 +333,7 @@ def start_generate(data, key):
           "width": info['width'],
           "height": info['height'],
           "elevation": 0,
-          "sort": 0,
+          "sort": 1,
           "occlusion": {
             "mode": 0,
             "alpha": 0
@@ -520,7 +539,14 @@ def start_generate(data, key):
         tiles.append(js_tile)
 
     save_image(img_floor_1, out_floor1_path)
-    out = {"walls": walls, 'tiles': tiles, "levels": levels}
+
+
+    # Делаем почву.
+
+    #  По сути будет текстура земли. Из неё делаются выерзки.
+
+
+    out = {"walls": walls, 'tiles': tiles}
     return out
 
 def square_contur(walls):

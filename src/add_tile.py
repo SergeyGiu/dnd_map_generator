@@ -1,7 +1,6 @@
-from Tools.demo.spreadsheet import cellname
-
 import src.image_utils as image_utils
 from src.utils import generate_id, tile_add_action
+
 
 def luke_and_stairs(data, type_luke = "base", type_stairs = "stick",rotate = 0):
     # Функция создаёт тайл люк, а под ним на уровень ниже тайл лестница
@@ -57,9 +56,6 @@ def luke_and_stairs(data, type_luke = "base", type_stairs = "stick",rotate = 0):
 
     tag_luke = generate_id(16)
 
-    actions = []
-    for i in range(40):
-        actions.append(generate_id(16))
     js_stair = {
             "texture": {
                 "src": module_stair_path,
