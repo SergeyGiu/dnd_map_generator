@@ -4,12 +4,15 @@ import os
 import src.generate_menu as generate_menu
 import src.settings_menu as settings_menu
 
-from src.utils import read_conf,write_conf, init_os, clear_console
+from src.utils import *
 os.environ['TERM'] = 'dumb'
 if __name__ == '__main__':
     my_os = init_os()
-    conf = read_conf()
+    conf = read_default_conf()
+    list_pack = check_texture_pack()
     conf['os'] = my_os
+    conf['map_settings']['texture_packs'] = list_pack
+    conf['map_settings']['current_texture_pack'] = 'base'
     write_conf(conf)
 
     while True:

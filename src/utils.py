@@ -44,16 +44,27 @@ def clear_console():
     else:
         exit("Неизвестная ОС")
 
+def check_texture_pack():
+    """Проверка текстур паков"""
+    packs = os.listdir('images')
+    return packs
+def read_default_conf():
+
+    try:
+        with open('conf/default_settings.json', 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except FileNotFoundError:
+        pass
 
 def read_conf():
     try:
-        with open('conf/language.json', 'r', encoding='utf-8') as f:
+        with open('conf/my_settings.json', 'r', encoding='utf-8') as f:
             return json.load(f)
     except FileNotFoundError:
         pass
 
 def write_conf(local_config):
-    with open('conf/language.json', 'w', encoding='utf-8') as f:
+    with open('conf/my_settings.json', 'w', encoding='utf-8') as f:
         json.dump(local_config, f, ensure_ascii=False, indent=4)
 
 
@@ -506,3 +517,80 @@ def cut_hole_in_wall(wall, cell, cnt=1, l=None, width=None, offset=None):
     print(f'{Color.CYAN}---->Итого: сплошных кусков={len(solid)}, дыр={len(holes)}{Color.WHITE}')
 
     return solid, holes
+
+
+def choice_texture(path):
+    """Выбор текстуры и вернуть массив путей"""
+    files = os.listdir(path)
+
+    ar_groups = {}
+    for file in files:
+        file_split = file.split('_')
+        id_file = file_split[1].replace('.png', '')
+        if ar_groups.get(id_file) is None:
+            ar_groups[id_file] = []
+        ar_groups[id_file].append(file)
+
+    group = random.choice(list(ar_groups.keys()))
+    files_in_group = ar_groups.get(group)
+    path_to_files = []
+    for i in range(len(files_in_group)):
+        path_to_files.append(path + "/" + files_in_group[i])
+    return path_to_files
+
+
+def cos_angle(x1, y1, x2, y2):
+    """
+    Вычисляет косинус угла вектора (x1,y1) -> (x2,y2) относительно горизонтали.
+
+    Args:
+        x1, y1: Координаты первой точки.
+        x2, y2: Координаты второй точки.
+
+    Returns:
+        float: Косинус угла (от -1.0 до 1.0).
+    """
+    # Вектор направления
+    dx = x2 - x1
+    dy = y2 - y1
+
+    # Длина вектора (гипотенуза)
+    length = math.hypot(dx, dy)
+
+    # Если точки совпадают, длина 0, избегаем деления на ноль
+    if length == 0:
+        return 1.0  # Или 0.0, или None, в зависимости от логики.
+        # Обычно для нулевого вектора направление не определено.
+
+    # Косинус угла = соседний катет / гипотенуза = dx / length
+    return dx / length
+
+
+import math
+
+
+def sin_angle(x1, y1, x2, y2):
+    """
+    Вычисляет синус угла вектора (x1,y1) -> (x2,y2) относительно горизонтали.
+
+    Args:
+        x1, y1: Координаты первой точки.
+        x2, y2: Координаты второй точки.
+
+    Returns:
+        float: Синус угла (от -1.0 до 1.0).
+               Знак зависит от направления по Y:
+               1.0 = строго вверх
+              -1.0 = строго вниз
+               0.0 = строго горизонтально
+    """
+    dx = x2 - x1
+    dy = y2 - y1
+
+    length = math.hypot(dx, dy)
+
+    if length == 0:
+        return 0.0  # Для нулевого вектора синус не определен, 0 - безопасное значение
+
+    # Синус угла = противоположный катет / гипотенуза = dy / length
+    return dy / length

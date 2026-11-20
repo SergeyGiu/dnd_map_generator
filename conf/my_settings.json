@@ -1,0 +1,69 @@
+{
+    "ru": {
+        "exit": "Выход",
+        "settings": "Настройки",
+        "generate": "Начать генерацию",
+        "back": "Назад",
+        "menu_main_lb": "Главное меню",
+        "language_choice": "Изменить язык",
+        "settings_output": "Настройки вывода",
+        "map_settings_lb": "Настройки параметров карты",
+        "en_new_num": "Введите новое значение или оставьте поле пустым",
+        "name_module": "Имя модуля",
+        "name_module_date": "Добавлять в конце имени дату создания",
+        "sector": "Участок",
+        "village": "Село",
+        "city": "Город",
+        "world": "Мир",
+        "scene_add": "Добавить сцену",
+        "actor_add": "Добавить актёра",
+        "module_gen": "Сгенерировать модуль",
+        "settings_scene": "Настроить сцену",
+        "scene_size": "Размер сцены",
+        "type_scene": "Тип сцены",
+        "en_new_scene_size": "Введите новый размер сцены",
+        "en_new_type_scene": "Введите новый тип сцены",
+        "season": "Время года",
+        "snow_lvl": "Процент заполнения снегом",
+        "biome": "Биом",
+        "wear": "Уровень износа",
+        "ruin_level": "Уровень разрушения. 0-новое, 100-полная разруха",
+        "overgrowth_level": "Степень зарастания построек: 0 — нет растений, 100 — всё заросло",
+        "abandonment_level": "На сколько давно покинуто людьми. 0-живут сейчас, 100 - очень давно",
+        "texture_pack": "Текстурпак",
+        "map": {
+            "cell_size_px": "Размер ячейки в пикселях",
+            "cell_size": "Размер ячейки",
+            "padding": "Отступ от края карты"
+        }
+    },
+    "lang_available": [
+        "ru"
+    ],
+    "lang": "ru",
+    "map_settings": {
+        "type_scenes": [
+            "house_001"
+        ],
+        "cell_size_px": 50,
+        "cell_size": 5,
+        "cell_size_type": "ft",
+        "padding": 0.25,
+        "map_size_sector_default": "1000x1000",
+        "texture_packs": [
+            "interior",
+            "stairs",
+            "texture_stone",
+            "texture_wood",
+            "texture_glass",
+            "minecraft",
+            "base"
+        ],
+        "current_texture_pack": "base"
+    },
+    "module_settings": {
+        "name_module": "module-auto-gen",
+        "name_module_date": "Yes"
+    },
+    "os": "Linux"
+}

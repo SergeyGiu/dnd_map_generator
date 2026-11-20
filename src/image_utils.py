@@ -1,7 +1,9 @@
 from PIL import Image, ImageFilter, ImageOps
 
+import src.utils
 from src.utils import generate_id
 
+texture_pack = 'base'
 
 def open_image(image_path: str):
     return Image.open(image_path)
@@ -224,6 +226,21 @@ def get_top_left_point(polygon):
     ys = [p[1] for p in polygon]
     return (min(xs), min(ys), max(xs), max(ys))
 
+
+def gen_tile_across_segment(segment, cell=None, offset=None, extend=None):
+    """Универсальная функция, которая рисует тайл вдоль отрезка segment"""
+    if cell is not None:
+        offset = cell//5
+        extend = cell//5
+    else:
+        if offset is None:
+            exit("Не задано ни размера ячейки, ни offset (image_utils->gen_tile_across_segment)")
+        if extend is None:
+            exit("Не задано ни размера ячейки, ни extend (image_utils->gen_tile_across_segment)")
+
+
+
+
 def gen_tile_wall(data):
     import math
 
@@ -268,25 +285,31 @@ def gen_tile_wall(data):
             (round(x1e - ox), round(y1e - oy)),
         ]
 
-    path = data["path"]
-    path_ = data["path_"]
     wall = data["wall"]
     key = data['key']
-    range_top = data['range_top']
-    input_image = data['input_image']
     elevation = data['elevation']
+    range_top = elevation+9
+    type_texture = data['type_texture']
+    module_name = data['module_name']
+    gen_tile = generate_id(16)
+
+    texture_input = src.utils.choice_texture(
+        path=f'images/{texture_pack}/wall/{type_texture}')[0]
+    file_name = texture_input.split('/')[-1]
+    path_output = f'output/{module_name}/assets/{file_name}_{gen_tile}.png'
+    path_module = f'modules/{module_name}/assets/{file_name}_{gen_tile}.png'
+
     polygon = line_to_polygon(wall,offset= 5,extend=5)
     left_top = get_top_left_point(polygon)
-    img = tile_image_to_polygon(input_image,
-                                points=polygon)
+    img = tile_image_to_polygon(texture_input,points=polygon)
     info = get_image_info(img)
 
-    save_image(img, path)
-    gen_tile = generate_id(16)
+    save_image(img, path_output)
+
 
     js_tile = {
         "texture": {
-            "src": path_,
+            "src": path_module,
             "anchorX": 0.5,
             "anchorY": 0.5,
             "offsetX": 0,

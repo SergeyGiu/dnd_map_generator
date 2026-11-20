@@ -1,5 +1,8 @@
 import random
 from doctest import debug
+from typing import Protocol
+
+from add_wall import add_wall, add_door, add_window
 from src.utils import Color
 
 from src.utils import generate_id, distance_2d
@@ -32,61 +35,6 @@ def start_generate(data):
     data должен содержать\n
         """
     # Проверка входных данных
-
-
-    def cut_door(walls_local, direct_local):
-        """Вырезает в стене проём для двери
-        walls_local - сырой массив стен"""
-        walls_up = walls_local[0]
-        walls_right = walls_local[1]
-        walls_down = walls_local[2]
-        walls_left = walls_local[3]
-
-
-        doors_raw_local = []
-        if direct_local == 'up':
-            top_left_x = random.randrange(walls_up[0][0] + cell,walls_up[1][0] - cell * 2, cell)
-            top_left_y = walls_up[0][1]
-
-            walls_local.append([(walls_up[0][0], walls_up[0][1]),
-                                    (top_left_x, top_left_y)])
-            walls_local.append([(top_left_x+cell, top_left_y),
-                                    (walls_up[1][0], walls_up[1][1])])
-
-            doors_raw_local.append([(top_left_x, top_left_y), (top_left_x+cell, top_left_y)])
-            walls_local.pop(0)
-        elif direct_local == 'right':
-            top_left_x = walls_right[0][0]
-            top_left_y =  random.randrange(walls_right[0][1] + cell,walls_right[1][1] - cell * 2, cell)
-            walls_local.append([(walls_right[0][0], walls_right[0][1]),
-                                (top_left_x, top_left_y)])
-            walls_local.append([(top_left_x, top_left_y+cell),
-                                (walls_right[1][0], walls_right[1][1])])
-            doors_raw_local.append([(top_left_x, top_left_y), (top_left_x, top_left_y+cell)])
-            print('Координаты двери:',doors_raw_local[-1])
-            print('Координаты стен вокруг двери')
-            print('    ', walls_local[-2])
-            print('    ', walls_local[-1])
-
-            walls_local.pop(1)
-        elif direct_local == 'down':
-            top_left_x = random.randrange(walls_down[0][0] + cell,walls_down[1][0] - cell * 2, cell)
-            top_left_y = walls_down[0][1]
-
-            walls_local.append([(walls_down[0][0], walls_down[0][1]),
-                                (top_left_x, top_left_y)])
-            walls_local.append([(top_left_x + cell, top_left_y),
-                                (walls_down[1][0], walls_down[1][1])])
-
-            doors_raw_local.append(
-                [(top_left_x, top_left_y), (top_left_x + cell, top_left_y)])
-            walls_local.pop(2)
-
-        return walls_local,doors_raw_local
-
-    # Присваиваем данные
-
-    type_scene = data.get('type_scene')
     biome = data.get('biome')
     sector = data['sector']
     key = sector.id_scene
@@ -145,84 +93,26 @@ def start_generate(data):
 
     # Переводим в нужный формат стены и добавляем к ним тайлы
     for i in range(len(walls_raw)):
-        gen_id = generate_id(16)
-        js = {
-            "light": 20,
-            "sight": 20,
-            "sound": 20,
-            "move": 20,
-            "c": [
-            walls_raw[i][0][0],
-            walls_raw[i][0][1],
-            walls_raw[i][1][0],
-            walls_raw[i][1][1]
-                ],
-            "_id": gen_id ,
-            "dir": 0,
-            "door": 0,
-            "ds": 0,
-            "threshold": {
-            "light": None,
-            "sight": None,
-            "sound": None,
-            "attenuation": False
-                },
-            "flags": {
-                "wall-height": {
-                    "bottom": 0,
-                    "top": 9}
-            },
-            "_key": f"!scenes.walls!{key}.{gen_id}"
-        }
-        wall = [walls_raw[i][0][0], walls_raw[i][0][1], walls_raw[i][1][0], walls_raw[i][1][1]]
-        data_tile = {"input_image": 'images/texture_wood/wood_001.png',
-                     'wall': wall, 'key': key,
-                     'path': f'output/{module_name}/assets/wood_002_{i}.png',
-                     'path_': f'modules/{module_name}/assets/wood_002_{i}.png',
-                     "range_top": 9,
-                     'elevation':0
-                     }
-        tile = gen_tile_wall(data_tile)
-        tiles.append(tile)
-        walls.append(js)
+        js_wall, js_tile = add_wall(wall = walls_raw[i], id_scene = key, elevation=0,
+                      module_name = module_name, type_texture='wood')
+
+        tiles.append(js_tile)
+        walls.append(js_wall)
 
     for i in range(len(doors_raw)):
-        gen_id = generate_id(16)
-        js = {
-            "light": 20,
-            "sight": 20,
-            "sound": 20,
-            "move": 20,
-            "c": [
-            doors_raw[i][0][0],
-            doors_raw[i][0][1],
-            doors_raw[i][1][0],
-            doors_raw[i][1][1]
-                ],
-            "_id": gen_id ,
-            "dir": 0,
-            "door": 1,
-            "ds": 0,
-            "threshold": {
-            "light": None,
-            "sight": None,
-            "sound": None,
-            "attenuation": False
-                },
-            "flags": { "wall-height": {
-                    "bottom": 0,
-                    "top": 9}
-            },
-            "_key": f"!scenes.walls!{key}.{gen_id}"
-        }
-        gen_tile = generate_id(16)
-        door_img = open_image('images/texture_wood/wood_door_001.png')
+        js_wall, js_tile = add_door(wall = doors_raw[i], id_scene=key,
+                      module_name = module_name,
+                      type_texture='wood',
+                      type_door='single',
+                      elevation = 0,
+                      cell=cell)
+
+        '''door_img = open_image('images/texture_wood/wood_door_001.png')
         door_img = resize_image(door_img, cell, cell)
         path_tile = f'output/{module_name}/assets/wood_door_001_{gen_tile}.png'
         path_tile_ = f'modules/{module_name}/assets/wood_door_001_{gen_tile}.png'
         save_image(door_img, path_tile)
         left_top = [doors_raw[i][0][0], doors_raw[i][0][1]-cell//2]
-
 
         js_tile = {
             "texture": {
@@ -264,41 +154,12 @@ def start_generate(data):
             },
             "flags": {},
             "_key": f"!scenes.tiles!{key}.{gen_tile}"
-        }
+        }'''
         tiles.append(js_tile)
-        walls.append(js)
+        walls.append(js_wall)
 
     for i in range(len(windows_raw)):
-        gen_id = generate_id(16)
-        js = {
-          "light": 30,
-          "sight": 30,
-          "sound": 20,
-          "move": 20,
-          "threshold": {
-            "light": 10,
-            "sight": 10,
-            "attenuation": True,
-            "sound": None
-          },
-          "c": [
-            windows_raw[i][0][0],
-            windows_raw[i][0][1],
-            windows_raw[i][1][0],
-            windows_raw[i][1][1]
-          ],
-          "_id": gen_id ,
-          "dir": 0,
-          "door": 0,
-          "ds": 0,
-          "flags": {
-            "wall-height": {
-              "bottom": 0,
-              "top": 9
-            }
-          },
-          "_key": f"!scenes.walls!{key}.{gen_id}"
-        }
+        js = add_window(wall = windows_raw[i], id_scene=key, elevation = 0)
 
         gen_tile = generate_id(16)
         door_img = open_image('images/texture_glass/glass_001.png')
@@ -356,7 +217,6 @@ def start_generate(data):
     # Добавить тайл пола
     # Рассчитать внешний полигон
     polygon = build_outer_polygon(walls)
-    print('polygon', polygon)
     left_top = get_top_left_point(polygon)
 
     img_floor_1 = tile_image_to_polygon('images/texture_wood/wood_001.png',points=polygon)
@@ -432,12 +292,12 @@ def start_generate(data):
     tiles.append(js_tile)
 
     # Делаем погреб
-    print('Делаем погреб')
     x1,y1,x2,y2 = square_contur(polygon)
-    print('Контур дома',  x1,y1,x2,y2)
 
     # Рандомим будет ли погреб
+    type_cellar = 'simple_cellar'
     if random.randint(1, 100) > 0:
+        print(f"{Color.MAGENTA}Строительство подвала")
         luke = {"x": random.randrange(x1, x2, cell),
                 "y": random.randrange(y1, y2, cell),
                 'key': key,
@@ -445,7 +305,7 @@ def start_generate(data):
                 'elevation': 0,
                 'cell': cell,
                 }
-        print('Люк расположен:', luke['x'], luke['y'])
+        print(f'--->Расположение люка {luke["x"]}:{luke["y"]}')
         polygon2 = [[luke['x'],luke['y']],
                     [luke['x']+cell, luke['y']],
                     [luke['x']+cell, luke['y']+cell],
@@ -469,7 +329,6 @@ def start_generate(data):
                     'elevation': 0,
                     'cell': cell,
                     }
-            print("dict_cellar.get('direct_outer_luke')", dict_cellar.get('direct_outer_luke'))
             if dict_cellar.get('direct_outer_luke') == 'up': rotate = 0
             elif dict_cellar.get('direct_outer_luke') == 'down': rotate = 180
             elif dict_cellar.get('direct_outer_luke') == 'left': rotate = 270
@@ -477,54 +336,15 @@ def start_generate(data):
             else:
                 exit('Неизвестный наклон')
 
-            print('rotate',rotate)
             luke_tile = src.add_tile.luke_and_stairs(luke_outer, type_stairs='diagonal_wood', rotate=rotate, type_luke='double_door')
-            print('Тайлы люка')
-            print(*luke_tile, sep='\n')
             tiles.extend(luke_tile)
         for i in range(len(walls_cellar)):
+            js_wall, js_tile = add_wall(wall=walls_cellar[i], id_scene = key, elevation=-10,
+                     module_name=module_name,type_texture='wood')
 
-            gen_id = generate_id(16)
-            js = {
-                "light": 20,
-                "sight": 20,
-                "sound": 20,
-                "move": 20,
-                "c": [
-                walls_cellar[i][0][0],
-                walls_cellar[i][0][1],
-                walls_cellar[i][1][0],
-                walls_cellar[i][1][1]
-                    ],
-                "_id": gen_id ,
-                "dir": 0,
-                "door": 0,
-                "ds": 0,
-                "threshold": {
-                "light": None,
-                "sight": None,
-                "sound": None,
-                "attenuation": False
-                    },
-                "flags": {
-                    "wall-height": {
-                        "bottom": -10,
-                        "top": -1}
-                },
-                "_key": f"!scenes.walls!{key}.{gen_id}"
-            }
-            wall = [walls_cellar[i][0][0], walls_cellar[i][0][1], walls_cellar[i][1][0], walls_cellar[i][1][1]]
-            data_tile = {"input_image": 'images/texture_wood/wood_001.png',
-                         'wall': wall, 'key': key,
-                         'path': f'output/{module_name}/assets/wood_002_{gen_id}_{i}.png',
-                         'path_': f'modules/{module_name}/assets/wood_002_{gen_id}_{i}.png',
-                         'range_top': -1,
-                         "elevation": -10,
-                         }
-            tile = gen_tile_wall(data_tile)
-            tiles.append(tile)
-            walls.append(js)
-            walls_cellar_dict.append(js)
+            tiles.append(js_tile)
+            walls.append(js_wall)
+            walls_cellar_dict.append(js_wall)
 
         # Добавить тайл пола в подвале
         # Рассчитать внешний полигон
@@ -532,11 +352,6 @@ def start_generate(data):
 
 
         left_top = get_top_left_point(polygon)
-        if debug:
-            print("Дебажим определение тайла и полигона")
-            print('Стены подвала', walls_cellar_dict)
-            print('внешний контур подвала', polygon)
-            print('left_top', left_top)
         img = tile_image_to_polygon('images/texture_stone/stone_001.png',points=polygon)
         # Создать конечную картинку
         info = get_image_info(img)
@@ -605,6 +420,8 @@ def start_generate(data):
         }
         tiles.append(js_tile)
 
+        print(Color.WHITE)
+
     save_image(img_floor_1, out_floor1_path)
 
 
@@ -620,7 +437,6 @@ def square_contur(walls):
     """Определяет крайние точки"""
     x_buf = []
     y_buf = []
-    print(walls)
     for i in range(len(walls)):
         x_buf.append(walls[i][0])
         y_buf.append(walls[i][1])
@@ -702,15 +518,12 @@ def add_cellar(x,y,
         second_exit = random.choice(ar_flags)
     else: second_exit = ''
     if debug:
-        print('Координаты люка:', f"{x}:{y}")
-        print("Границы погреба:", f'{board[0]}:{board[1]}')
-        print("Размер дома", f'{home_border}')
-        print("Двери в доме", doors)
+        print("--->Границы погреба:", f'{board[0]}:{board[1]}')
         if ar_flags:
-            print('Подвал подошёл к границе:', ar_flags)
-            print("Второй выход находится в", second_exit)
+            print('--->Подвал подошёл к границе:', ar_flags)
+            print("--->Второй выход находится в", second_exit)
         else:
-            print("Подвал не имеет дверей наружу")
+            print("--->Подвал не имеет дверей наружу")
 
     coord_outer_luke = []
     dol = None
@@ -751,7 +564,6 @@ def add_cellar(x,y,
             ar_wall_local.append([[board[1][0],board[0][1]],[board[1][0],board[1][1]]])
         elif second_exit == 'up':
             wall_exit = [[board[0][0],board[0][1]], [board[1][0],board[0][1]]]
-            print('wall_exit', wall_exit)
             door_y = wall_exit[0][1]
 
             while True:
@@ -782,7 +594,6 @@ def add_cellar(x,y,
             ar_wall_local.append([[board[1][0], board[0][1]], [board[1][0], board[1][1]]])
         elif second_exit == 'left':
             wall_exit = [[board[0][0],board[0][1]], [board[0][0],board[1][1]]]
-            print('wall_exit', wall_exit)
             door_x = wall_exit[0][0]
             while True:
                 if wall_exit[0][1] + cell == wall_exit[1][1] - cell * 2:
@@ -812,8 +623,6 @@ def add_cellar(x,y,
             ar_wall_local.append([[board[1][0], board[0][1]], [board[1][0], board[1][1]]])
         elif second_exit == 'right':
             wall_exit = [[board[1][0],board[0][1]], [board[1][0],board[1][1]]]
-            print('wall_exit', wall_exit)
-
             door_x = wall_exit[0][0]
             while True:
                 if wall_exit[0][1] + cell == wall_exit[1][1] - cell * 2:

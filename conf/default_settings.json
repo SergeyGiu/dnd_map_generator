@@ -30,6 +30,7 @@
         "ruin_level": "Уровень разрушения. 0-новое, 100-полная разруха",
         "overgrowth_level": "Степень зарастания построек: 0 — нет растений, 100 — всё заросло",
         "abandonment_level": "На сколько давно покинуто людьми. 0-живут сейчас, 100 - очень давно",
+        "texture_pack": "Текстурпак",
         "map": {
             "cell_size_px": "Размер ячейки в пикселях",
             "cell_size": "Размер ячейки",
@@ -48,11 +49,12 @@
         "cell_size": 5,
         "cell_size_type": "ft",
         "padding": 0.25,
-        "map_size_sector_default": "1000x1000"
+        "map_size_sector_default": "1000x1000",
+        "texture_packs": []
     },
     "module_settings": {
         "name_module": "module-auto-gen",
         "name_module_date": "Yes"
     },
-    "os": "Windows"
+    "os": "Linux"
 }

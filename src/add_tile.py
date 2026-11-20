@@ -261,3 +261,7 @@ def luke_and_stairs(data, type_luke = "base", type_stairs = "stick",rotate = 0):
 
     tiles.append(js_luke)
     return tiles
+
+
+def door():
+    """добавить тайл дверь"""

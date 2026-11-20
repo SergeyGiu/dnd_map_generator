@@ -95,6 +95,8 @@ def menu_map_settings():
         print(f'2-{conf[lang]["map"]["padding"]} '
               f'({conf["map_settings"]["padding"]})')
 
+        print(f'3-{conf[lang]["texture_pack"]}')
+
         num = input()
 
         if num == '0' or num == '':
